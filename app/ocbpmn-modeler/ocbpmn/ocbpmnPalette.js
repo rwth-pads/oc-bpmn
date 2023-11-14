@@ -4,7 +4,7 @@ import {
 
 
 /**
- * A palette that allows you to create BPMN _and_ custom elements.
+ * A palette that allows you to create BPMN _and_ ocbpmn elements.
  */
 export default function PaletteProvider(palette, create, elementFactory, spaceTool, lassoTool) {
 
@@ -64,14 +64,14 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
   }
 
   assign(actions, {
-    'custom-triangle': createAction(
-      'custom:triangle', 'custom', 'icon-custom-triangle'
+    'ocbpmn-triangle': createAction(
+      'ocbpmn:triangle', 'ocbpmn', 'icon-ocbpmn-triangle'
     ),
-    'custom-circle': createAction(
-      'custom:circle', 'custom', 'icon-custom-circle'
+    'ocbpmn-circle': createAction(
+      'ocbpmn:circle', 'ocbpmn', 'icon-ocbpmn-circle'
     ),
-    'custom-separator': {
-      group: 'custom',
+    'ocbpmn-separator': {
+      group: 'ocbpmn',
       separator: true
     },
     'lasso-tool': {

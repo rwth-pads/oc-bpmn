@@ -14,38 +14,38 @@ import {
 
 
 /**
- * A handler responsible for updating the custom element's businessObject
+ * A handler responsible for updating the ocbpmn element's businessObject
  * once changes on the diagram happen.
  */
-export default function CustomUpdater(eventBus, modeling, bpmnjs) {
+export default function ocbpmnUpdater(eventBus, modeling, bpmnjs) {
 
   CommandInterceptor.call(this, eventBus);
 
-  function updateCustomElement(e) {
+  function updateocbpmnElement(e) {
     var context = e.context,
         shape = context.shape,
         businessObject = shape.businessObject;
 
-    if (!isCustom(shape)) {
+    if (!isocbpmn(shape)) {
       return;
     }
 
     var parent = shape.parent;
 
-    var customElements = bpmnjs._customElements;
+    var ocbpmnElements = bpmnjs._ocbpmnElements;
 
-    // make sure element is added / removed from bpmnjs.customElements
+    // make sure element is added / removed from bpmnjs.ocbpmnElements
     if (!parent) {
-      collectionRemove(customElements, businessObject);
+      collectionRemove(ocbpmnElements, businessObject);
     } else {
-      collectionAdd(customElements, businessObject);
+      collectionAdd(ocbpmnElements, businessObject);
     }
 
-    // save custom element position
+    // save ocbpmn element position
     assign(businessObject, pick(shape, [ 'x', 'y' ]));
   }
 
-  function updateCustomConnection(e) {
+  function updateocbpmnConnection(e) {
 
     var context = e.context,
         connection = context.connection,
@@ -55,13 +55,13 @@ export default function CustomUpdater(eventBus, modeling, bpmnjs) {
 
     var parent = connection.parent;
 
-    var customElements = bpmnjs._customElements;
+    var ocbpmnElements = bpmnjs._ocbpmnElements;
 
-    // make sure element is added / removed from bpmnjs.customElements
+    // make sure element is added / removed from bpmnjs.ocbpmnElements
     if (!parent) {
-      collectionRemove(customElements, businessObject);
+      collectionRemove(ocbpmnElements, businessObject);
     } else {
-      collectionAdd(customElements, businessObject);
+      collectionAdd(ocbpmnElements, businessObject);
     }
 
     // update waypoints
@@ -82,13 +82,13 @@ export default function CustomUpdater(eventBus, modeling, bpmnjs) {
     'shape.create',
     'shape.move',
     'shape.delete'
-  ], ifCustomElement(updateCustomElement));
+  ], ifocbpmnElement(updateocbpmnElement));
 
   this.reverted([
     'shape.create',
     'shape.move',
     'shape.delete'
-  ], ifCustomElement(updateCustomElement));
+  ], ifocbpmnElement(updateocbpmnElement));
 
   this.executed([
     'connection.create',
@@ -98,7 +98,7 @@ export default function CustomUpdater(eventBus, modeling, bpmnjs) {
     'connection.delete',
     'connection.layout',
     'connection.move'
-  ], ifCustomElement(updateCustomConnection));
+  ], ifocbpmnElement(updateocbpmnConnection));
 
   this.reverted([
     'connection.create',
@@ -108,32 +108,32 @@ export default function CustomUpdater(eventBus, modeling, bpmnjs) {
     'connection.delete',
     'connection.layout',
     'connection.move'
-  ], ifCustomElement(updateCustomConnection));
+  ], ifocbpmnElement(updateocbpmnConnection));
 
 
   /**
    * When morphing a Process into a Collaboration or vice-versa,
-   * make sure that the existing custom elements get their parents updated.
+   * make sure that the existing ocbpmn elements get their parents updated.
    */
-  function updateCustomElementsRoot(event) {
+  function updateocbpmnElementsRoot(event) {
     var context = event.context,
         oldRoot = context.oldRoot,
         newRoot = context.newRoot,
         children = oldRoot.children;
 
-    var customChildren = children.filter(isCustom);
+    var ocbpmnChildren = children.filter(isocbpmn);
 
-    if (customChildren.length) {
-      modeling.moveElements(customChildren, { x: 0, y: 0 }, newRoot);
+    if (ocbpmnChildren.length) {
+      modeling.moveElements(ocbpmnChildren, { x: 0, y: 0 }, newRoot);
     }
   }
 
-  this.postExecute('canvas.updateRoot', updateCustomElementsRoot);
+  this.postExecute('canvas.updateRoot', updateocbpmnElementsRoot);
 }
 
-inherits(CustomUpdater, CommandInterceptor);
+inherits(ocbpmnUpdater, CommandInterceptor);
 
-CustomUpdater.$inject = [ 'eventBus', 'modeling', 'bpmnjs' ];
+ocbpmnUpdater.$inject = [ 'eventBus', 'modeling', 'bpmnjs' ];
 
 
 // helpers ///////////////////////////////////
@@ -144,16 +144,16 @@ function copyWaypoints(connection) {
   });
 }
 
-function isCustom(element) {
-  return element && /custom:/.test(element.type);
+function isocbpmn(element) {
+  return element && /ocbpmn:/.test(element.type);
 }
 
-function ifCustomElement(fn) {
+function ifocbpmnElement(fn) {
   return function(event) {
     var context = event.context,
         element = context.shape || context.connection;
 
-    if (isCustom(element)) {
+    if (isocbpmn(element)) {
       fn(event);
     }
   };

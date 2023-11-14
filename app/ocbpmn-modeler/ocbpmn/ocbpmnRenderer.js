@@ -18,9 +18,9 @@ var COLOR_GREEN = '#52B415',
     COLOR_YELLOW = '#ffc800';
 
 /**
- * A renderer that knows how to render custom elements.
+ * A renderer that knows how to render ocbpmn elements.
  */
-export default function CustomRenderer(eventBus, styles) {
+export default function ocbpmnRenderer(eventBus, styles) {
 
   BaseRenderer.call(this, eventBus, 2000);
 
@@ -109,7 +109,7 @@ export default function CustomRenderer(eventBus, styles) {
     return componentsToPath(circlePath);
   };
 
-  this.drawCustomConnection = function(p, element) {
+  this.drawocbpmnConnection = function(p, element) {
     var attrs = computeStyle(attrs, {
       stroke: COLOR_RED,
       strokeWidth: 2
@@ -118,7 +118,7 @@ export default function CustomRenderer(eventBus, styles) {
     return svgAppend(p, createLine(element.waypoints, attrs));
   };
 
-  this.getCustomConnectionPath = function(connection) {
+  this.getocbpmnConnectionPath = function(connection) {
     var waypoints = connection.waypoints.map(function(p) {
       return p.original || p;
     });
@@ -137,54 +137,54 @@ export default function CustomRenderer(eventBus, styles) {
   };
 }
 
-inherits(CustomRenderer, BaseRenderer);
+inherits(ocbpmnRenderer, BaseRenderer);
 
-CustomRenderer.$inject = [ 'eventBus', 'styles' ];
+ocbpmnRenderer.$inject = [ 'eventBus', 'styles' ];
 
 
-CustomRenderer.prototype.canRender = function(element) {
-  return /^custom:/.test(element.type);
+ocbpmnRenderer.prototype.canRender = function(element) {
+  return /^ocbpmn:/.test(element.type);
 };
 
-CustomRenderer.prototype.drawShape = function(p, element) {
+ocbpmnRenderer.prototype.drawShape = function(p, element) {
   var type = element.type;
 
-  if (type === 'custom:triangle') {
+  if (type === 'ocbpmn:triangle') {
     return this.drawTriangle(p, element.width);
   }
 
-  if (type === 'custom:circle') {
+  if (type === 'ocbpmn:circle') {
     return this.drawCircle(p, element.width, element.height);
   }
 };
 
-CustomRenderer.prototype.getShapePath = function(shape) {
+ocbpmnRenderer.prototype.getShapePath = function(shape) {
   var type = shape.type;
 
-  if (type === 'custom:triangle') {
+  if (type === 'ocbpmn:triangle') {
     return this.getTrianglePath(shape);
   }
 
-  if (type === 'custom:circle') {
+  if (type === 'ocbpmn:circle') {
     return this.getCirclePath(shape);
   }
 };
 
-CustomRenderer.prototype.drawConnection = function(p, element) {
+ocbpmnRenderer.prototype.drawConnection = function(p, element) {
 
   var type = element.type;
 
-  if (type === 'custom:connection') {
-    return this.drawCustomConnection(p, element);
+  if (type === 'ocbpmn:connection') {
+    return this.drawocbpmnConnection(p, element);
   }
 };
 
 
-CustomRenderer.prototype.getConnectionPath = function(connection) {
+ocbpmnRenderer.prototype.getConnectionPath = function(connection) {
 
   var type = connection.type;
 
-  if (type === 'custom:connection') {
-    return this.getCustomConnectionPath(connection);
+  if (type === 'ocbpmn:connection') {
+    return this.getocbpmnConnectionPath(connection);
   }
 };

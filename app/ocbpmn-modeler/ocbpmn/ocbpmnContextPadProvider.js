@@ -12,7 +12,7 @@ import {
 } from 'min-dash';
 
 
-export default function CustomContextPadProvider(injector, connect, translate) {
+export default function ocbpmnContextPadProvider(injector, connect, translate) {
 
   injector.invoke(ContextPadProvider, this);
 
@@ -27,12 +27,12 @@ export default function CustomContextPadProvider(injector, connect, translate) {
       connect.start(event, element, autoActivate);
     }
 
-    if (isAny(businessObject, [ 'custom:triangle', 'custom:circle' ])) {
+    if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle' ])) {
       assign(actions, {
         'connect': {
           group: 'connect',
           className: 'bpmn-icon-connection-multi',
-          title: translate('Connect using custom connection'),
+          title: translate('Connect using ocbpmn connection'),
           action: {
             click: startConnect,
             dragstart: startConnect
@@ -45,9 +45,9 @@ export default function CustomContextPadProvider(injector, connect, translate) {
   };
 }
 
-inherits(CustomContextPadProvider, ContextPadProvider);
+inherits(ocbpmnContextPadProvider, ContextPadProvider);
 
-CustomContextPadProvider.$inject = [
+ocbpmnContextPadProvider.$inject = [
   'injector',
   'connect',
   'translate'

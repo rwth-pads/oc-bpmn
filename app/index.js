@@ -2,11 +2,11 @@
 
 import pizzaDiagram from '../resources/pizza-collaboration.bpmn';
 
-import customElements from './custom-elements.json';
+import ocbpmnElements from './ocbpmn-elements.json';
 
-import CustomModeler from './custom-modeler';
+import ocbpmnModeler from './ocbpmn-modeler';
 
-var modeler = new CustomModeler({
+var modeler = new ocbpmnModeler({
   container: '#canvas',
   keyboard: {
     bindTo: document
@@ -16,7 +16,7 @@ var modeler = new CustomModeler({
 modeler.importXML(pizzaDiagram).then(() => {
   modeler.get('canvas').zoom('fit-viewport');
 
-  modeler.addCustomElements(customElements);
+  modeler.addocbpmnElements(ocbpmnElements);
 }).catch(err => {
   console.error('something went wrong:', err);
 });

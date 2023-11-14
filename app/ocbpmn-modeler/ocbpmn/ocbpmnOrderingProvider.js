@@ -4,16 +4,16 @@ import OrderingProvider from 'diagram-js/lib/features/ordering/OrderingProvider'
 
 
 /**
- * a simple ordering provider that ensures that custom
+ * a simple ordering provider that ensures that ocbpmn
  * connections are always rendered on top.
  */
-export default function CustomOrderingProvider(eventBus, canvas) {
+export default function ocbpmnOrderingProvider(eventBus, canvas) {
 
   OrderingProvider.call(this, eventBus);
 
   this.getOrdering = function(element, newParent) {
 
-    if (element.type === 'custom:connection') {
+    if (element.type === 'ocbpmn:connection') {
 
       // always move to end of root element
       // to display always on top
@@ -25,6 +25,6 @@ export default function CustomOrderingProvider(eventBus, canvas) {
   };
 }
 
-CustomOrderingProvider.$inject = [ 'eventBus', 'canvas' ];
+ocbpmnOrderingProvider.$inject = [ 'eventBus', 'canvas' ];
 
-inherits(CustomOrderingProvider, OrderingProvider);
+inherits(ocbpmnOrderingProvider, OrderingProvider);

@@ -3,7 +3,7 @@ import {
   inject
 } from '../TestHelper';
 
-import CustomModeler from '../../app/custom-modeler';
+import ocbpmnModeler from '../../app/ocbpmn-modeler';
 
 import diagramXML from './Modeling.collaboration.bpmn';
 
@@ -12,28 +12,28 @@ describe('modeling', function() {
 
   describe('collaboration', function() {
 
-    beforeEach(bootstrapBpmnJS(CustomModeler, diagramXML));
+    beforeEach(bootstrapBpmnJS(ocbpmnModeler, diagramXML));
 
 
     describe('removing participants', function() {
 
       beforeEach(inject(function(bpmnjs) {
 
-        var customShape = {
-          type: 'custom:triangle',
-          id: 'CustomTriangle_1',
+        var ocbpmnShape = {
+          type: 'ocbpmn:triangle',
+          id: 'ocbpmnTriangle_1',
           x: 300,
           y: 300
         };
 
-        bpmnjs.addCustomElements([ customShape ]);
+        bpmnjs.addocbpmnElements([ ocbpmnShape ]);
       }));
 
 
       it('should update parent', inject(function(elementRegistry, canvas, modeling) {
 
         // given
-        var customTriangle = elementRegistry.get('CustomTriangle_1');
+        var ocbpmnTriangle = elementRegistry.get('ocbpmnTriangle_1');
 
         // when
         modeling.removeElements([
@@ -42,7 +42,7 @@ describe('modeling', function() {
         ]);
 
         // then
-        expect(customTriangle.parent).to.eql(canvas.getRootElement());
+        expect(ocbpmnTriangle.parent).to.eql(canvas.getRootElement());
       }));
 
     });

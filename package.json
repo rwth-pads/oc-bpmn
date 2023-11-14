@@ -1,7 +1,7 @@
 {
-  "name": "custom-elements-example",
+  "name": "ocbpmn-elements-example",
   "version": "0.0.0",
-  "description": "An example on how to create a custom elements with bpmn-js",
+  "description": "An example on how to create a ocbpmn elements with bpmn-js",
   "main": "app/app.js",
   "repository": {
     "type": "git",
