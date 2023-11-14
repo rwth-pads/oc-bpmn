@@ -11,9 +11,9 @@ import {
 
 
 /**
- * A custom factory that knows how to create BPMN _and_ custom elements.
+ * A ocbpmn factory that knows how to create BPMN _and_ ocbpmn elements.
  */
-export default function CustomElementFactory(bpmnFactory, moddle) {
+export default function ocbpmnElementFactory(bpmnFactory, moddle) {
   BpmnElementFactory.call(this, bpmnFactory, moddle);
 
   var self = this;
@@ -33,8 +33,8 @@ export default function CustomElementFactory(bpmnFactory, moddle) {
       return self.baseCreate(elementType, assign({ type: 'label' }, DEFAULT_LABEL_SIZE, attrs));
     }
 
-    // add type to businessObject if custom
-    if (/^custom:/.test(type)) {
+    // add type to businessObject if ocbpmn
+    if (/^ocbpmn:/.test(type)) {
       if (!attrs.businessObject) {
         attrs.businessObject = {
           type: type
@@ -49,7 +49,7 @@ export default function CustomElementFactory(bpmnFactory, moddle) {
 
       // add width and height if shape
       if (!/:connection$/.test(type)) {
-        assign(attrs, self._getCustomElementSize(type));
+        assign(attrs, self._getocbpmnElementSize(type));
       }
 
 
@@ -97,19 +97,19 @@ export default function CustomElementFactory(bpmnFactory, moddle) {
   };
 }
 
-inherits(CustomElementFactory, BpmnElementFactory);
+inherits(ocbpmnElementFactory, BpmnElementFactory);
 
-CustomElementFactory.$inject = [
+ocbpmnElementFactory.$inject = [
   'bpmnFactory',
   'moddle'
 ];
 
 
 /**
- * Returns the default size of custom shapes.
+ * Returns the default size of ocbpmn shapes.
  *
  * The following example shows an interface on how
- * to setup the custom shapes's dimensions.
+ * to setup the ocbpmn shapes's dimensions.
  *
  * @example
  *
@@ -125,11 +125,11 @@ CustomElementFactory.$inject = [
  *
  * @return {Dimensions} a {width, height} object representing the size of the element
  */
-CustomElementFactory.prototype._getCustomElementSize = function(type) {
+ocbpmnElementFactory.prototype._getocbpmnElementSize = function(type) {
   var shapes = {
     __default: { width: 100, height: 80 },
-    'custom:triangle': { width: 40, height: 40 },
-    'custom:circle': { width: 140, height: 140 }
+    'ocbpmn:triangle': { width: 40, height: 40 },
+    'ocbpmn:circle': { width: 140, height: 140 }
   };
 
   return shapes[type] || shapes.__default;

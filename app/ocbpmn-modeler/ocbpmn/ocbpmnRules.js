@@ -13,31 +13,31 @@ import RuleProvider from 'diagram-js/lib/features/rules/RuleProvider';
 var HIGH_PRIORITY = 1500;
 
 
-function isCustom(element) {
-  return element && /^custom:/.test(element.type);
+function isocbpmn(element) {
+  return element && /^ocbpmn:/.test(element.type);
 }
 
 /**
- * Specific rules for custom elements
+ * Specific rules for ocbpmn elements
  */
-export default function CustomRules(eventBus) {
+export default function ocbpmnRules(eventBus) {
   RuleProvider.call(this, eventBus);
 }
 
-inherits(CustomRules, RuleProvider);
+inherits(ocbpmnRules, RuleProvider);
 
-CustomRules.$inject = [ 'eventBus' ];
+ocbpmnRules.$inject = [ 'eventBus' ];
 
 
-CustomRules.prototype.init = function() {
+ocbpmnRules.prototype.init = function() {
 
   /**
    * Can shape be created on target container?
    */
   function canCreate(shape, target) {
 
-    // only judge about custom elements
-    if (!isCustom(shape)) {
+    // only judge about ocbpmn elements
+    if (!isocbpmn(shape)) {
       return;
     }
 
@@ -50,21 +50,21 @@ CustomRules.prototype.init = function() {
    */
   function canConnect(source, target) {
 
-    // only judge about custom elements
-    if (!isCustom(source) && !isCustom(target)) {
+    // only judge about ocbpmn elements
+    if (!isocbpmn(source) && !isocbpmn(target)) {
       return;
     }
 
-    // allow connection between custom shape and task
-    if (isCustom(source)) {
+    // allow connection between ocbpmn shape and task
+    if (isocbpmn(source)) {
       if (is(target, 'bpmn:Task')) {
-        return { type: 'custom:connection' };
+        return { type: 'ocbpmn:connection' };
       } else {
         return false;
       }
-    } else if (isCustom(target)) {
+    } else if (isocbpmn(target)) {
       if (is(source, 'bpmn:Task')) {
-        return { type: 'custom:connection' };
+        return { type: 'ocbpmn:connection' };
       } else {
         return false;
       }
@@ -78,14 +78,14 @@ CustomRules.prototype.init = function() {
 
     var type;
 
-    // do not allow mixed movements of custom / BPMN shapes
+    // do not allow mixed movements of ocbpmn / BPMN shapes
     // if any shape cannot be moved, the group cannot be moved, too
     var allowed = reduce(shapes, function(result, s) {
       if (type === undefined) {
-        type = isCustom(s);
+        type = isocbpmn(s);
       }
 
-      if (type !== isCustom(s) || result === false) {
+      if (type !== isocbpmn(s) || result === false) {
         return false;
       }
 
@@ -93,7 +93,7 @@ CustomRules.prototype.init = function() {
     }, undefined);
 
     // reject, if we have at least one
-    // custom element that cannot be moved
+    // ocbpmn element that cannot be moved
     return allowed;
   });
 
@@ -107,9 +107,9 @@ CustomRules.prototype.init = function() {
   this.addRule('shape.resize', HIGH_PRIORITY, function(context) {
     var shape = context.shape;
 
-    if (isCustom(shape)) {
+    if (isocbpmn(shape)) {
 
-      // cannot resize custom elements
+      // cannot resize ocbpmn elements
       return false;
     }
   });

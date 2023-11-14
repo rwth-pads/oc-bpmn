@@ -1,39 +1,39 @@
-> :warning: Should custom elements be serialized within the BPMN 2.0 diagram? If that is the case, this example is not what you are looking for. Checkout our [:notebook: custom elements guide](https://github.com/bpmn-io/bpmn-js-examples/tree/master/custom-elements) to learn how to build custom elements in a BPMN 2.0 compatible way.
+> :warning: Should ocbpmn elements be serialized within the BPMN 2.0 diagram? If that is the case, this example is not what you are looking for. Checkout our [:notebook: ocbpmn elements guide](https://github.com/bpmn-io/bpmn-js-examples/tree/master/ocbpmn-elements) to learn how to build ocbpmn elements in a BPMN 2.0 compatible way.
 
 
-# bpmn-js example: Custom Shapes
+# bpmn-js example: ocbpmn Shapes
 
-[![CI](https://github.com/bpmn-io/bpmn-js-example-custom-shapes/actions/workflows/CI.yml/badge.svg)](https://github.com/bpmn-io/bpmn-js-example-custom-shapes/actions/workflows/CI.yml)
+[![CI](https://github.com/bpmn-io/bpmn-js-example-ocbpmn-shapes/actions/workflows/CI.yml/badge.svg)](https://github.com/bpmn-io/bpmn-js-example-ocbpmn-shapes/actions/workflows/CI.yml)
 
-This advanced example shows how to extend [bpmn-js](https://github.com/bpmn-io/bpmn-js) with new shapes and connections that are __not part of the BPMN 2.0 diagram / incompatible with the BPMN 2.0 standard__. Consult our [:notebook: custom elements guide](https://github.com/bpmn-io/bpmn-js-examples/tree/master/custom-elements) to learn how to extend the toolkit in a BPMN 2.0 compliant way.
+This advanced example shows how to extend [bpmn-js](https://github.com/bpmn-io/bpmn-js) with new shapes and connections that are __not part of the BPMN 2.0 diagram / incompatible with the BPMN 2.0 standard__. Consult our [:notebook: ocbpmn elements guide](https://github.com/bpmn-io/bpmn-js-examples/tree/master/ocbpmn-elements) to learn how to extend the toolkit in a BPMN 2.0 compliant way.
 
 ## About
 
-This example extends [bpmn-js](https://github.com/bpmn-io/bpmn-js), creating a custom BPMN modeler that can display and add custom shapes and connections to BPMN 2.0 diagrams.
+This example extends [bpmn-js](https://github.com/bpmn-io/bpmn-js), creating a ocbpmn BPMN modeler that can display and add ocbpmn shapes and connections to BPMN 2.0 diagrams.
 
-The renderer ships with custom rules that define which modeling operations are possible on custom shapes and connections.
-It can import custom shapes and connections from a [JSON](http://json.org/) descriptor and updates their properties during modeling.
+The renderer ships with ocbpmn rules that define which modeling operations are possible on ocbpmn shapes and connections.
+It can import ocbpmn shapes and connections from a [JSON](http://json.org/) descriptor and updates their properties during modeling.
 
-![demo application screenshot](docs/screenshot.png "bpmn-js custom elements example")
+![demo application screenshot](docs/screenshot.png "bpmn-js ocbpmn elements example")
 
 
 ## Usage Summary
 
-The example provides a [custom modeler](app/custom-modeler/index.js). After instantiation, the modeler allows you to add and get custom shapes and connections.
+The example provides a [ocbpmn modeler](app/ocbpmn-modeler/index.js). After instantiation, the modeler allows you to add and get ocbpmn shapes and connections.
 
 ```javascript
-// add custom elements
-var customElements = [
+// add ocbpmn elements
+var ocbpmnElements = [
   {
-    type: "custom:triangle",
-    id: "CustomTriangle_1",
+    type: "ocbpmn:triangle",
+    id: "ocbpmnTriangle_1",
     x: 300,
     y: 300
   },
   {
-    type: "custom:connection",
-    id: "CustomConnection_1",
-    source: "CustomTriangle_1",
+    type: "ocbpmn:connection",
+    id: "ocbpmnConnection_1",
+    source: "ocbpmnTriangle_1",
     target: "Task_1",
     waypoints: [
       // ...
@@ -41,22 +41,22 @@ var customElements = [
  }
 ];
 
-customModeler.addCustomElements(customElements);
+ocbpmnModeler.addocbpmnElements(ocbpmnElements);
 
 
 // get them after modeling
-customModeler.getCustomElements(); // all currently existing custom elements
+ocbpmnModeler.getocbpmnElements(); // all currently existing ocbpmn elements
 ```
 
-The modeler ships with a [module](app/custom-modeler/custom/index.js) that provides the following [bpmn-js](https://github.com/bpmn-io/bpmn-js) extensions:
+The modeler ships with a [module](app/ocbpmn-modeler/ocbpmn/index.js) that provides the following [bpmn-js](https://github.com/bpmn-io/bpmn-js) extensions:
 
-* [`CustomContextPadProvider`](app/custom-modeler/custom/CustomContextPadProvider.js): A custom context pad that allows you to connect custom elements to BPMN elements
-* [`CustomElementFactory`](app/custom-modeler/custom/CustomElementFactory.js): A factory that knows about how to create BPMN and custom shapes
-* [`CustomOrderingProvider`](app/custom-modeler/custom/CustomOrderingProvider.js): A provider that ensures custom connections are always rendered on top
-* [`CustomPalette`](app/custom-modeler/custom/CustomPalette.js): A custom palette that allows you to create custom elements
-* [`CustomRenderer`](app/custom-modeler/custom/CustomRenderer.js): A renderer that knows how to draw custom elements
-* [`CustomRules`](app/custom-modeler/custom/CustomRules.js): A rule provider that defines the allowed interaction with custom elements
-* [`CustomUpdater`](app/custom-modeler/custom/CustomUpdater.js): An updater that updates business data while the user interacts with the diagram
+* [`ocbpmnContextPadProvider`](app/ocbpmn-modeler/ocbpmn/ocbpmnContextPadProvider.js): A ocbpmn context pad that allows you to connect ocbpmn elements to BPMN elements
+* [`ocbpmnElementFactory`](app/ocbpmn-modeler/ocbpmn/ocbpmnElementFactory.js): A factory that knows about how to create BPMN and ocbpmn shapes
+* [`ocbpmnOrderingProvider`](app/ocbpmn-modeler/ocbpmn/ocbpmnOrderingProvider.js): A provider that ensures ocbpmn connections are always rendered on top
+* [`ocbpmnPalette`](app/ocbpmn-modeler/ocbpmn/ocbpmnPalette.js): A ocbpmn palette that allows you to create ocbpmn elements
+* [`ocbpmnRenderer`](app/ocbpmn-modeler/ocbpmn/ocbpmnRenderer.js): A renderer that knows how to draw ocbpmn elements
+* [`ocbpmnRules`](app/ocbpmn-modeler/ocbpmn/ocbpmnRules.js): A rule provider that defines the allowed interaction with ocbpmn elements
+* [`ocbpmnUpdater`](app/ocbpmn-modeler/ocbpmn/ocbpmnUpdater.js): An updater that updates business data while the user interacts with the diagram
 
 
 ## Build and Run
