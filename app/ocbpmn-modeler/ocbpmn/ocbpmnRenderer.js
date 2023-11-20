@@ -14,8 +14,8 @@ import {
 } from 'tiny-svg';
 
 var COLOR_GREEN = '#52B415',
-    COLOR_RED = '#cc0000',
-    COLOR_YELLOW = '#ffc800';
+  COLOR_RED = '#cc0000',
+  COLOR_YELLOW = '#ffc800';
 
 /**
  * A renderer that knows how to render ocbpmn elements.
@@ -26,12 +26,43 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
   var computeStyle = styles.computeStyle;
 
-  this.drawTriangle = function(p, side) {
-    var halfSide = side / 2,
-        points,
-        attrs;
+  this.drawHexagon = function (p, width, height) {
+  // Using the SVG path from the custom design to ensure visual consistency across the application.
+  var pathData = 'm 135.52411,89.188187 3.09831,-1.805787 c 0.0583,-0.03396 0.0874,-0.05094 0.11827,-0.05759 0.0274,-0.0059 0.0555,-0.0059 0.0829,0 0.0309,0.0067 0.06,0.02363 0.11826,0.05759 l 3.09831,1.805787 m -6.51607,0 v 3.600324 m 0,0 c 0,0.07191 0,0.107815 0.0102,0.139927 m 0,0 c 0.009,0.0284 0.0237,0.05448 0.0432,0.0765 m 0,0 c 0.022,0.02494 0.0522,0.04258 0.1127,0.07781 m 0,0 3.09196,1.802073 m -3.25804,-5.69664 3.25804,1.687896 m 0,4.008744 3.09195,-1.802073 m 0,0 c 0.0605,-0.03524 0.0907,-0.05287 0.11269,-0.07781 m 0,0 c 0.0195,-0.02203 0.0342,-0.04811 0.0432,-0.0765 m 0,0 c 0.0102,-0.03211 0.0102,-0.06802 0.0102,-0.139927 m 0,0 v -3.600324 m -3.25803,5.696644 v -4.008748 m 3.25803,-1.687896 -3.25803,1.687896';
 
-    points = [ halfSide, 0, side, side, 0, side ];
+  // Applying visual styles that match the SVG's appearance to maintain design integrity.
+  var attrs = computeStyle({}, {
+    stroke: '#000000',
+    strokeWidth: 0.325092,
+    fill: 'none'
+  });
+
+  var path = svgCreate('path');
+
+  // Calculate the scale and position.
+  var scaleX = width / 6.8414822;
+  var scaleY = height / 7.8895063;
+  var translateX = -135.3614 * scaleX;
+  var translateY = -87.157871 * scaleY;
+
+  // Apply the scale and position transformations to the path.
+  svgAttr(path, {
+    d: pathData,
+    transform: 'translate(' + translateX + ',' + translateY + ') scale(' + scaleX + ',' + scaleY + ')'
+  });
+  svgAttr(path, attrs);
+
+  svgAppend(p, path);
+
+  return path;
+};
+
+  this.drawTriangle = function (p, side) {
+    var halfSide = side / 2,
+      points,
+      attrs;
+
+    points = [halfSide, 0, side, side, 0, side];
 
     attrs = computeStyle(attrs, {
       stroke: COLOR_GREEN,
@@ -54,9 +85,9 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
   this.getTrianglePath = function(element) {
     var x = element.x,
-        y = element.y,
-        width = element.width,
-        height = element.height;
+      y = element.y,
+      width = element.width,
+      height = element.height;
 
     var trianglePath = [
       [ 'M', x + width / 2, y ],
@@ -70,7 +101,7 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
   this.drawCircle = function(p, width, height) {
     var cx = width / 2,
-        cy = height / 2;
+      cy = height / 2;
 
     var attrs = computeStyle(attrs, {
       stroke: COLOR_YELLOW,
@@ -149,6 +180,10 @@ ocbpmnRenderer.prototype.canRender = function(element) {
 ocbpmnRenderer.prototype.drawShape = function(p, element) {
   var type = element.type;
 
+  if (type === 'ocbpmn:hexagon') {
+    return this.drawHexagon(p, element.width, element.height);
+  }
+
   if (type === 'ocbpmn:triangle') {
     return this.drawTriangle(p, element.width);
   }
@@ -160,6 +195,10 @@ ocbpmnRenderer.prototype.drawShape = function(p, element) {
 
 ocbpmnRenderer.prototype.getShapePath = function(shape) {
   var type = shape.type;
+
+  if (type === 'ocbpmn:hexagon') {
+    return this.getHexagonPath(shape);
+  }
 
   if (type === 'ocbpmn:triangle') {
     return this.getTrianglePath(shape);

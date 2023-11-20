@@ -64,6 +64,9 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
   }
 
   assign(actions, {
+    'ocbpmn-hexagon': createAction(
+      'ocbpmn:hexagon', 'ocbpmn', 'icon-ocbpmn-hexagon'
+    ),
     'ocbpmn-triangle': createAction(
       'ocbpmn:triangle', 'ocbpmn', 'icon-ocbpmn-triangle'
     ),
