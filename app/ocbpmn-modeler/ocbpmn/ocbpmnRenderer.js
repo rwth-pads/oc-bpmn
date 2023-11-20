@@ -57,13 +57,6 @@ export default function ocbpmnRenderer(eventBus, styles) {
   return path;
 };
 
-
-  this.getHexagonPath = function (element) {
-    var pathData = this.drawHexagon(null, element.width, element.height); //drawing logic
-    return pathData;
-  };
-
-
   this.drawTriangle = function (p, side) {
     var halfSide = side / 2,
       points,
