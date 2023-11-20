@@ -6,11 +6,18 @@ import ocbpmnElements from './ocbpmn-elements.json';
 
 import ocbpmnModeler from './ocbpmn-modeler';
 
+import BpmnModeler from 'bpmn-js/lib/Modeler';
+import BpmnColorPickerModule from 'bpmn-js-color-picker';
+
+
 var modeler = new ocbpmnModeler({
   container: '#canvas',
   keyboard: {
     bindTo: document
-  }
+  },
+  additionalModules: [
+    BpmnColorPickerModule
+  ]
 });
 
 modeler.importXML(pizzaDiagram).then(() => {
