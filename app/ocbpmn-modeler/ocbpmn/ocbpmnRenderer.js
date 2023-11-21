@@ -32,7 +32,7 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
   // Applying visual styles that match the SVG's appearance to maintain design integrity.
   var attrs = computeStyle({}, {
-    stroke: '#000000',
+    stroke: '#000000', //stroke color
     strokeWidth: 0.325092,
     fill: 'none'
   });
