@@ -6,8 +6,8 @@ import ocbpmnElements from './ocbpmn-elements.json';
 
 import ocbpmnModeler from './ocbpmn-modeler';
 
-import BpmnModeler from 'bpmn-js/lib/Modeler';
-import BpmnColorPickerModule from 'bpmn-js-color-picker';
+import ExtendedColorPickerModule from './ExtendedColorPickerModule';
+
 
 
 var modeler = new ocbpmnModeler({
@@ -16,7 +16,7 @@ var modeler = new ocbpmnModeler({
     bindTo: document
   },
   additionalModules: [
-    BpmnColorPickerModule
+    ExtendedColorPickerModule
   ]
 });
 
