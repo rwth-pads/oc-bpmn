@@ -27,35 +27,39 @@ export default function ocbpmnRenderer(eventBus, styles) {
   var computeStyle = styles.computeStyle;
 
   this.drawHexagon = function (p, width, height) {
-  // Using the SVG path from the custom design to ensure visual consistency across the application.
-  var pathData = 'm 135.52411,89.188187 3.09831,-1.805787 c 0.0583,-0.03396 0.0874,-0.05094 0.11827,-0.05759 0.0274,-0.0059 0.0555,-0.0059 0.0829,0 0.0309,0.0067 0.06,0.02363 0.11826,0.05759 l 3.09831,1.805787 m -6.51607,0 v 3.600324 m 0,0 c 0,0.07191 0,0.107815 0.0102,0.139927 m 0,0 c 0.009,0.0284 0.0237,0.05448 0.0432,0.0765 m 0,0 c 0.022,0.02494 0.0522,0.04258 0.1127,0.07781 m 0,0 3.09196,1.802073 m -3.25804,-5.69664 3.25804,1.687896 m 0,4.008744 3.09195,-1.802073 m 0,0 c 0.0605,-0.03524 0.0907,-0.05287 0.11269,-0.07781 m 0,0 c 0.0195,-0.02203 0.0342,-0.04811 0.0432,-0.0765 m 0,0 c 0.0102,-0.03211 0.0102,-0.06802 0.0102,-0.139927 m 0,0 v -3.600324 m -3.25803,5.696644 v -4.008748 m 3.25803,-1.687896 -3.25803,1.687896';
-
-  // Applying visual styles that match the SVG's appearance to maintain design integrity.
-  var attrs = computeStyle({}, {
-    stroke: '#000000', //stroke color
-    strokeWidth: 0.325092,
-    fill: 'none'
-  });
-
-  var path = svgCreate('path');
-
-  // Calculate the scale and position.
-  var scaleX = width / 6.8414822;
-  var scaleY = height / 7.8895063;
-  var translateX = -135.3614 * scaleX;
-  var translateY = -87.157871 * scaleY;
-
-  // Apply the scale and position transformations to the path.
-  svgAttr(path, {
-    d: pathData,
-    transform: 'translate(' + translateX + ',' + translateY + ') scale(' + scaleX + ',' + scaleY + ')'
-  });
-  svgAttr(path, attrs);
-
-  svgAppend(p, path);
-
-  return path;
-};
+    var fillPathData = 'M25 22L13 29L1 22V8L13 1L25 8V22Z';
+    var strokePathData = 'M13 29L25 22V8M13 29L1 22V8M13 29V14M25 8L13 1L1 8M25 8L13 14M1 8L13 14';
+  
+    var fillAttrs = computeStyle({}, {
+      fill: 'white'
+    });
+  
+    var strokeAttrs = computeStyle({}, {
+      stroke: 'black',
+      fill: 'none'
+    });
+  
+    var fillPath = svgCreate('path');
+    var strokePath = svgCreate('path');
+  
+    svgAttr(fillPath, {
+      d: fillPathData,
+      transform: 'scale(' + width / 26 + ',' + height / 30 + ')'
+    });
+  
+    svgAttr(strokePath, {
+      d: strokePathData,
+      transform: 'scale(' + width / 26 + ',' + height / 30 + ')'
+    });
+  
+    svgAttr(fillPath, fillAttrs);
+    svgAttr(strokePath, strokeAttrs);
+  
+    svgAppend(p, fillPath);
+    svgAppend(p, strokePath);
+  
+    return p;
+  };
 
   this.drawTriangle = function (p, side) {
     var halfSide = side / 2,
