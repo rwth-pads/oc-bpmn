@@ -8,7 +8,7 @@
         <semantic:flowNodeRef>OrderReceivedEvent</semantic:flowNodeRef>
         <semantic:flowNodeRef>_6-652</semantic:flowNodeRef>
         <semantic:flowNodeRef>_6-674</semantic:flowNodeRef>
-        <semantic:flowNodeRef>CalmocbpmnerTask</semantic:flowNodeRef>
+        <semantic:flowNodeRef>CalmCustomerTask</semantic:flowNodeRef>
       </semantic:lane>
       <semantic:lane id="_6-446" name="pizza chef">
         <semantic:flowNodeRef>_6-463</semantic:flowNodeRef>
@@ -34,7 +34,7 @@
       <semantic:outgoing>_6-748</semantic:outgoing>
       <semantic:messageEventDefinition messageRef="_1275940932433" />
     </semantic:intermediateCatchEvent>
-    <semantic:task id="CalmocbpmnerTask" name="Calm ocbpmner">
+    <semantic:task id="CalmCustomerTask" name="Calm Customer">
       <semantic:incoming>_6-748</semantic:incoming>
       <semantic:outgoing>_6-746</semantic:outgoing>
     </semantic:task>
@@ -60,8 +60,8 @@
     <semantic:sequenceFlow id="_6-636" name="" sourceRef="_6-565" targetRef="_6-616" />
     <semantic:sequenceFlow id="_6-691" name="" sourceRef="_6-652" targetRef="_6-674" />
     <semantic:sequenceFlow id="_6-693" name="" sourceRef="_6-652" targetRef="_6-463" />
-    <semantic:sequenceFlow id="_6-746" name="" sourceRef="CalmocbpmnerTask" targetRef="_6-674" />
-    <semantic:sequenceFlow id="_6-748" name="" sourceRef="_6-674" targetRef="CalmocbpmnerTask" />
+    <semantic:sequenceFlow id="_6-746" name="" sourceRef="CalmCustomerTask" targetRef="_6-674" />
+    <semantic:sequenceFlow id="_6-748" name="" sourceRef="_6-674" targetRef="CalmCustomerTask" />
   </semantic:process>
   <semantic:message id="_1275940932198" />
   <semantic:process id="_6-2" isExecutable="false">
@@ -121,14 +121,14 @@
     <semantic:sequenceFlow id="_6-436" name="" sourceRef="Task_3" targetRef="_6-406" />
   </semantic:process>
   <semantic:collaboration id="C1275940932557">
-    <semantic:participant id="_6-53" name="Pizza ocbpmner" processRef="_6-2" />
+    <semantic:participant id="_6-53" name="Pizza Customer" processRef="_6-2" />
     <semantic:participant id="_6-438" name="Pizza vendor" processRef="_6-1" />
     <semantic:messageFlow id="_6-638" name="pizza order" sourceRef="Task_1" targetRef="OrderReceivedEvent" />
     <semantic:messageFlow id="_6-642" name="" sourceRef="Task_2" targetRef="_6-674" />
     <semantic:messageFlow id="_6-646" name="receipt" sourceRef="_6-565" targetRef="_6-304" />
     <semantic:messageFlow id="_6-648" name="money" sourceRef="_6-304" targetRef="_6-565" />
     <semantic:messageFlow id="_6-640" name="pizza" sourceRef="_6-514" targetRef="_6-202" />
-    <semantic:messageFlow id="_6-750" name="" sourceRef="CalmocbpmnerTask" targetRef="Task_2" />
+    <semantic:messageFlow id="_6-750" name="" sourceRef="CalmCustomerTask" targetRef="Task_2" />
   </semantic:collaboration>
   <bpmndi:BPMNDiagram id="Trisotech.Visio-_6" name="Untitled Diagram" documentation="" resolution="96.00000267028808">
     <bpmndi:BPMNPlane bpmnElement="C1275940932557">
@@ -164,7 +164,7 @@
         <dc:Bounds x="218" y="404" width="32" height="32" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Trisotech.Visio__6_CalmocbpmnerTask" bpmnElement="CalmocbpmnerTask">
+      <bpmndi:BPMNShape id="Trisotech.Visio__6_CalmCustomerTask" bpmnElement="CalmCustomerTask">
         <dc:Bounds x="286" y="386" width="83" height="68" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
