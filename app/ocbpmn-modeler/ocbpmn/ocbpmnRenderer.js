@@ -26,37 +26,53 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
   var computeStyle = styles.computeStyle;
 
+  //hexagonv01
+
+// _createAction(elements, color) {
+//   return () => {
+//     const modeling = this._modeling;
+//     const elementRegistry = this._elementRegistry;
+
+//     elements.forEach(element => {
+//       if (element.type === 'ocbpmn:hexagon') {
+//         // Get the SVG element of the hexagon
+//         const gfx = elementRegistry.getGraphics(element);
+
+//         // Change the fill color of the fill path and the stroke color of the stroke path
+//         const paths = gfx.selectAll('path');
+//         const fillPath = paths[0];
+//         const strokePath = paths[1];
+//         fillPath.attr('fill', color.fill);
+//         strokePath.attr('stroke', color.stroke);
+//       } else {
+//         // Change the color of the element
+//         modeling.setColor(elements, {
+//           fill: color.fill,
+//           stroke: color.stroke
+//         });
+//       }
+//     });
+//   };
+// }
+
+
+  //hexagonv02
   this.drawHexagon = function (p, width, height) {
-    var fillPathData = 'M25 22L13 29L1 22V8L13 1L25 8V22Z';
-    var strokePathData = 'M13 29L25 22V8M13 29L1 22V8M13 29V14M25 8L13 1L1 8M25 8L13 14M1 8L13 14';
+    var svgString = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 26 30" fill="none">
+        <g clip-path="url(#clip0_2_2)">
+          <path d="M25 22L13 29L1 22V8L13 1L25 8V22Z" fill="white"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M13 0.421143L25.5 7.71281V22.2872L13 29.5788L0.5 22.2872V7.71281L13 0.421143ZM1.5 8.80901V21.7128L12.5 28.1295V14.309L1.5 8.80901ZM13.5 14.309V28.1295L24.5 21.7128V8.80901L13.5 14.309ZM23.9497 7.96615L13 13.441L2.05034 7.96615L13 1.57885L23.9497 7.96615Z" fill="black"/>
+        </g>
+        <defs>
+          <clipPath id="clip0_2_2">
+            <rect width="25.8576" height="29.8186" fill="white"/>
+          </clipPath>
+        </defs>
+      </svg>
+    `;
   
-    var fillAttrs = computeStyle({}, {
-      fill: 'white'
-    });
-  
-    var strokeAttrs = computeStyle({}, {
-      stroke: 'black',
-      fill: 'none'
-    });
-  
-    var fillPath = svgCreate('path');
-    var strokePath = svgCreate('path');
-  
-    svgAttr(fillPath, {
-      d: fillPathData,
-      transform: 'scale(' + width / 26 + ',' + height / 30 + ')'
-    });
-  
-    svgAttr(strokePath, {
-      d: strokePathData,
-      transform: 'scale(' + width / 26 + ',' + height / 30 + ')'
-    });
-  
-    svgAttr(fillPath, fillAttrs);
-    svgAttr(strokePath, strokeAttrs);
-  
-    svgAppend(p, fillPath);
-    svgAppend(p, strokePath);
+    p.innerHTML = svgString;
   
     return p;
   };
