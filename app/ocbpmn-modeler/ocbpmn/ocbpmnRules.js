@@ -106,10 +106,14 @@ ocbpmnRules.prototype.init = function() {
 
   this.addRule('shape.resize', HIGH_PRIORITY, function(context) {
     var shape = context.shape;
-
+  
     if (isocbpmn(shape)) {
-
-      // cannot resize ocbpmn elements
+      // Allow resize if the shape is a 'join'
+      if (shape.type === 'ocbpmn:join') {
+        return true;
+      }
+  
+      // Cannot resize other ocbpmn elements
       return false;
     }
   });

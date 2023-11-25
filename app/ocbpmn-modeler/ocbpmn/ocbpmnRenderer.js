@@ -77,6 +77,19 @@ export default function ocbpmnRenderer(eventBus, styles) {
     return p;
   };
 
+  this.drawJoin = function (p, width, height) {
+    var svgString = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 27 12" fill="none">
+        <path d="M1 11V1H26V11H1Z" fill="white" stroke="black" stroke-width="1"/>
+      </svg>
+    `;
+  
+    p.innerHTML = svgString;
+  
+    return p;
+  };
+  
+
   this.drawTriangle = function (p, side) {
     var halfSide = side / 2,
       points,
@@ -204,6 +217,10 @@ ocbpmnRenderer.prototype.drawShape = function(p, element) {
     return this.drawHexagon(p, element.width, element.height);
   }
 
+  if (type === 'ocbpmn:join') {
+    return this.drawJoin(p, element.width, element.height);
+  }
+
   if (type === 'ocbpmn:triangle') {
     return this.drawTriangle(p, element.width);
   }
@@ -218,6 +235,10 @@ ocbpmnRenderer.prototype.getShapePath = function(shape) {
 
   if (type === 'ocbpmn:hexagon') {
     return this.getHexagonPath(shape);
+  }
+
+  if (type === 'ocbpmn:join') {
+    return this.getJoinPath(shape);
   }
 
   if (type === 'ocbpmn:triangle') {
