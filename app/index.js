@@ -8,6 +8,8 @@ import ocbpmnModeler from './ocbpmn-modeler';
 
 import ExtendedColorPickerModule from './ExtendedColorPickerModule';
 
+import OcbpmnDirectEditingProvider from './OcbpmnDirectEditingProvider';
+
 
 
 var modeler = new ocbpmnModeler({
@@ -16,7 +18,8 @@ var modeler = new ocbpmnModeler({
     bindTo: document
   },
   additionalModules: [
-    ExtendedColorPickerModule
+    ExtendedColorPickerModule,
+    OcbpmnDirectEditingProvider
   ]
 });
 
