@@ -233,13 +233,13 @@ ocbpmnRenderer.prototype.drawShape = function(p, element) {
 ocbpmnRenderer.prototype.getShapePath = function(shape) {
   var type = shape.type;
 
-  if (type === 'ocbpmn:hexagon') {
-    return this.getHexagonPath(shape);
-  }
+  //if (type === 'ocbpmn:hexagon') {
+    //return this.getHexagonPath(shape);
+  //}
 
-  if (type === 'ocbpmn:join') {
-    return this.getJoinPath(shape);
-  }
+  //if (type === 'ocbpmn:join') {
+    //return this.getJoinPath(shape);
+  //}
 
   if (type === 'ocbpmn:triangle') {
     return this.getTrianglePath(shape);

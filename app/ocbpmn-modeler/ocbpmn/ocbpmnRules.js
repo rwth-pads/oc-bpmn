@@ -55,20 +55,28 @@ ocbpmnRules.prototype.init = function() {
       return;
     }
 
-    // allow connection between ocbpmn shape and task
-    if (isocbpmn(source)) {
-      if (is(target, 'bpmn:Task')) {
-        return { type: 'ocbpmn:connection' };
-      } else {
-        return false;
-      }
-    } else if (isocbpmn(target)) {
-      if (is(source, 'bpmn:Task')) {
-        return { type: 'ocbpmn:connection' };
-      } else {
-        return false;
-      }
-    }
+    // allow connection from 'ocbpmn:hexagon' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
+if (source.type === 'ocbpmn:hexagon') {
+  if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
+    return { type: 'bpmn:SequenceFlow' };
+  } else {
+    return false;
+  }
+}
+
+// use return { type: 'ocbpmn:connection' }; for custom connection
+
+// allow connection from 'ocbpmn:join' to 'bpmn:Task'
+if (source.type === 'ocbpmn:join') {
+  if (target.type === 'bpmn:Task') {
+    return { type: 'bpmn:SequenceFlow' };
+  } else {
+    return false;
+  }
+}
+
+// disallow all other connections
+return false;
   }
 
   this.addRule('elements.move', HIGH_PRIORITY, function(context) {
@@ -88,6 +96,11 @@ ocbpmnRules.prototype.init = function() {
       if (type !== isocbpmn(s) || result === false) {
         return false;
       }
+      
+      // allow moving custom shapes
+    if (isocbpmn(s)) {
+      return true;
+    }
 
       return canCreate(s, target);
     }, undefined);

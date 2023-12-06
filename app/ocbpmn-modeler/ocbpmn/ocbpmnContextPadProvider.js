@@ -27,7 +27,7 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
       connect.start(event, element, autoActivate);
     }
 
-    if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle' ])) {
+    if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join' ])) {
       assign(actions, {
         'connect': {
           group: 'connect',
