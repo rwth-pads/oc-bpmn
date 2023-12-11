@@ -57,7 +57,7 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
 
   //hexagonv02 because of difficulties with browser handling svg strokes
-  this.drawHexagon = function(p, width, height, color = { fill: 'green', stroke: 'black' }) {
+  this.drawHexagon = function(p, width, height, color = { fill: 'white', stroke: 'black' }) {
     var svgString = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 26 30" fill="none">
         <g clip-path="url(#clip0_2_2)">

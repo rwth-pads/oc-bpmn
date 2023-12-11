@@ -12,13 +12,20 @@ export default function ChangeColor(modeler) {
 
         elements.forEach(element => {
             if (element.type === 'ocbpmn:hexagon') {
+                // Store the colors in the element's business object
+                element.businessObject.customColors = colors;
+
                 // Get the graphical representation of the element
                 const gfx = elementRegistry.getGraphics(element);
 
-                // Find the SVG path inside gfx and update its fill attribute
+                // Update the fill and stroke colors of the hexagon
                 const svgPath = gfx.querySelector('.fill-path');
+                const svgStrokePath = gfx.querySelector('.stroke-path');
                 if (svgPath) {
                     svgPath.setAttribute('fill', colors.fill);
+                }
+                if (svgStrokePath) {
+                    svgStrokePath.setAttribute('stroke', colors.stroke);
                 }
             } else {
                 // For all other elements, use the original behavior
