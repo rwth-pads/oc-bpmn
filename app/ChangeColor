@@ -1,0 +1,29 @@
+export default function ChangeColor(modeler) {
+    const modeling = modeler.get('modeling');
+    const elementRegistry = modeler.get('elementRegistry');
+
+    // Backup the original setColor function
+    const originalSetColor = modeling.setColor;
+
+    // Override the setColor function
+    modeling.setColor = function(elements, colors) {
+        // Ensure elements is an array
+        elements = Array.isArray(elements) ? elements : [elements];
+
+        elements.forEach(element => {
+            if (element.type === 'ocbpmn:hexagon') {
+                // Get the graphical representation of the element
+                const gfx = elementRegistry.getGraphics(element);
+
+                // Find the SVG path inside gfx and update its fill attribute
+                const svgPath = gfx.querySelector('.fill-path');
+                if (svgPath) {
+                    svgPath.setAttribute('fill', colors.fill);
+                }
+            } else {
+                // For all other elements, use the original behavior
+                originalSetColor.call(this, [element], colors);
+            }
+        });
+    };
+}
