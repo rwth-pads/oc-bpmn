@@ -3,23 +3,56 @@ import ColorContextPadProvider from 'bpmn-js-color-picker/colors/ColorContextPad
 
 class ExtendedColorPopupProvider extends ColorPopupProvider {
     getEntries(elements) {
-        const originalEntries = super.getEntries(elements);
-      
+      // Get original entries
+      let originalEntries = super.getEntries(elements);
+
+      // Keep only the 'Default' entry from originalEntries
+      originalEntries = originalEntries.filter(entry => entry.id === 'default-color');
         const newColors = [
           {
-            label: 'NewRed',
+            label: 'Default',
+            fill: '#ffffff',
+            stroke: '#000000'
+          },
+          {
+            label: 'EmergeRed',
             fill: '#FFC2C2',
             stroke: '#FF0000'
           },
           {
-            label: 'NewGreen',
+            label: 'EmergeGreen',
             fill: '#C2FFC2',
-            stroke: '#00920B'
+            stroke: '#44ff00'
           },
           {
-            label: 'NewBlue',
-            fill: '#A299FF',
-            stroke: '#090068'
+            label: 'EmergeBlue',
+            fill: '#6691ff',
+            stroke: '#0048ff'
+          },
+          {
+            label: 'EmergeYellow',
+            fill: '#FFFF00', // Yellow fill
+            stroke: '#FFD700' // Gold stroke
+          },
+          {
+            label: 'DissolveRed',
+            fill: '#FFFFFF', // White fill
+            stroke: '#FF0000' // Red stroke
+          },
+          {
+            label: 'DissolveGreen',
+            fill: '#FFFFFF', // White fill
+            stroke: '#44ff00' // Green stroke
+          },
+          {
+            label: 'DissolveBlue',
+            fill: '#FFFFFF', // White fill
+            stroke: '#0048ff' // Blue stroke
+          },
+          {
+            label: 'DissolveYellow',
+            fill: '#FFFFFF', // Yellow fill
+            stroke: '#FFD700' // Gold stroke
           }
         ];
       

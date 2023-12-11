@@ -131,7 +131,7 @@ ocbpmnElementFactory.prototype._getocbpmnElementSize = function(type) {
     'ocbpmn:triangle': { width: 40, height: 40 },
     'ocbpmn:circle': { width: 140, height: 140 },
     'ocbpmn:hexagon': { width: 26*1.5, height: 30*1.5 },
-    'ocbpmn:join': { width: 50, height: 20 },
+    'ocbpmn:join': { width: 34, height: 42 },
   };
 
   return shapes[type] || shapes.__default;

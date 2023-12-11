@@ -70,12 +70,6 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
     'ocbpmn-join': createAction(
       'ocbpmn:join', 'ocbpmn', 'icon-ocbpmn-join'
     ),
-    'ocbpmn-triangle': createAction(
-      'ocbpmn:triangle', 'ocbpmn', 'icon-ocbpmn-triangle'
-    ),
-    'ocbpmn-circle': createAction(
-      'ocbpmn:circle', 'ocbpmn', 'icon-ocbpmn-circle'
-    ),
     'ocbpmn-separator': {
       group: 'ocbpmn',
       separator: true

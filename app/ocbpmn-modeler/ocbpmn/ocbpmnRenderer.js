@@ -56,13 +56,13 @@ export default function ocbpmnRenderer(eventBus, styles) {
 // }
 
 
-  //hexagonv02
-  this.drawHexagon = function (p, width, height) {
+  //hexagonv02 because of difficulties with browser handling svg strokes
+  this.drawHexagon = function(p, width, height, color = { fill: 'white', stroke: 'black' }) {
     var svgString = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 26 30" fill="none">
         <g clip-path="url(#clip0_2_2)">
-          <path d="M25 22L13 29L1 22V8L13 1L25 8V22Z" fill="white"/>
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M13 0.421143L25.5 7.71281V22.2872L13 29.5788L0.5 22.2872V7.71281L13 0.421143ZM1.5 8.80901V21.7128L12.5 28.1295V14.309L1.5 8.80901ZM13.5 14.309V28.1295L24.5 21.7128V8.80901L13.5 14.309ZM23.9497 7.96615L13 13.441L2.05034 7.96615L13 1.57885L23.9497 7.96615Z" fill="black"/>
+        <path class="fill-path" d="M25 22L13 29L1 22V8L13 1L25 8V22Z" fill="${color.fill}"/>
+        <path class="stroke-path" fill-rule="evenodd" clip-rule="evenodd" d="M13 0.421143L25.5 7.71281V22.2872L13 29.5788L0.5 22.2872V7.71281L13 0.421143ZM1.5 8.80901V21.7128L12.5 28.1295V14.309L1.5 8.80901ZM13.5 14.309V28.1295L24.5 21.7128V8.80901L13.5 14.309ZM23.9497 7.96615L13 13.441L2.05034 7.96615L13 1.57885L23.9497 7.96615Z" stroke="${color.stroke}"/>
         </g>
         <defs>
           <clipPath id="clip0_2_2">
@@ -77,11 +77,12 @@ export default function ocbpmnRenderer(eventBus, styles) {
     return p;
   };
 
+
   this.drawJoin = function (p, width, height) {
     var svgString = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 27 12" fill="none">
-        <path d="M1 11V1H26V11H1Z" fill="white" stroke="black" stroke-width="1"/>
-      </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="42" viewBox="0 0 35 42" fill="none">
+    <path d="M0.75 40.6754V1.32464L33.5423 21L0.75 40.6754Z" fill="white" stroke="black" stroke-width="1.5"/>
+    </svg>
     `;
   
     p.innerHTML = svgString;
@@ -233,13 +234,13 @@ ocbpmnRenderer.prototype.drawShape = function(p, element) {
 ocbpmnRenderer.prototype.getShapePath = function(shape) {
   var type = shape.type;
 
-  if (type === 'ocbpmn:hexagon') {
-    return this.getHexagonPath(shape);
-  }
+  //if (type === 'ocbpmn:hexagon') {
+    //return this.getHexagonPath(shape);
+  //}
 
-  if (type === 'ocbpmn:join') {
-    return this.getJoinPath(shape);
-  }
+  //if (type === 'ocbpmn:join') {
+    //return this.getJoinPath(shape);
+  //}
 
   if (type === 'ocbpmn:triangle') {
     return this.getTrianglePath(shape);
