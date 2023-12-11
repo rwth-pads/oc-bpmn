@@ -12,7 +12,7 @@ class ExtendedColorPopupProvider extends ColorPopupProvider {
           {
             label: 'Default',
             fill: '#ffffff',
-            stroke: '#000000'
+            stroke: '#22242A'
           },
           {
             label: 'EmergeRed',

@@ -57,7 +57,7 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
 
   //hexagonv02 because of difficulties with browser handling svg strokes
-  this.drawHexagon = function(p, width, height, color = { fill: 'white', stroke: 'black' }) {
+  this.drawHexagon = function(p, width, height, color = { fill: 'white', stroke: '#22242A' }) {
     var svgString = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 26 30" fill="none">
         <g clip-path="url(#clip0_2_2)">
@@ -80,8 +80,8 @@ export default function ocbpmnRenderer(eventBus, styles) {
 
   this.drawJoin = function (p, width, height) {
     var svgString = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="42" viewBox="0 0 35 42" fill="none">
-    <path d="M0.75 40.6754V1.32464L33.5423 21L0.75 40.6754Z" fill="white" stroke="black" stroke-width="1.5"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="37" height="42" viewBox="0 0 37 42" fill="none">
+    <path d="M0.75 40.7119V1.28806L35.4806 21L0.75 40.7119Z" fill="white" stroke="#22242A" stroke-width="2.5"/>
     </svg>
     `;
   
