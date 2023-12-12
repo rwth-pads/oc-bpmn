@@ -175,13 +175,15 @@ export default function ocbpmnRenderer(eventBus, styles) {
   };
 
   this.drawocbpmnConnection = function(p, element) {
+    // Use custom colors if available, otherwise default to red
+    const customColors = element.businessObject.customColors || { stroke: '#22242A' };
     var attrs = computeStyle(attrs, {
-      stroke: COLOR_RED,
+      stroke: customColors.stroke,
       strokeWidth: 2
     });
 
     return svgAppend(p, createLine(element.waypoints, attrs));
-  };
+};
 
   this.getocbpmnConnectionPath = function(connection) {
     var waypoints = connection.waypoints.map(function(p) {

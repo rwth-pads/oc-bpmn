@@ -1,24 +1,21 @@
 export default function ChangeColor(modeler) {
     const modeling = modeler.get('modeling');
     const elementRegistry = modeler.get('elementRegistry');
+    const canvas = modeler.get('canvas'); // Access the canvas
 
     // Backup the original setColor function
     const originalSetColor = modeling.setColor;
 
     // Override the setColor function
     modeling.setColor = function(elements, colors) {
-        // Ensure elements is an array
         elements = Array.isArray(elements) ? elements : [elements];
 
         elements.forEach(element => {
-            if (element.type === 'ocbpmn:hexagon') {
-                // Store the colors in the element's business object
+            if (element.type === 'ocbpmn:hexagon' || element.type === 'ocbpmn:connection') {
                 element.businessObject.customColors = colors;
 
-                // Get the graphical representation of the element
+                // Update the element's graphical representation
                 const gfx = elementRegistry.getGraphics(element);
-
-                // Update the fill and stroke colors of the hexagon
                 const svgPath = gfx.querySelector('.fill-path');
                 const svgStrokePath = gfx.querySelector('.stroke-path');
                 if (svgPath) {
@@ -27,8 +24,12 @@ export default function ChangeColor(modeler) {
                 if (svgStrokePath) {
                     svgStrokePath.setAttribute('stroke', colors.stroke);
                 }
+
+                // Trigger a redraw/update of the element
+                canvas.addMarker(element, 'needs-update');
+                canvas.removeMarker(element, 'needs-update');
+                canvas.changed(element);
             } else {
-                // For all other elements, use the original behavior
                 originalSetColor.call(this, [element], colors);
             }
         });

@@ -31,7 +31,7 @@ class ExtendedColorPopupProvider extends ColorPopupProvider {
           },
           {
             label: 'EmergeYellow',
-            fill: '#FFFF00', // Yellow fill
+            fill: '#fdff8f', // Yellow fill
             stroke: '#FFD700' // Gold stroke
           },
           {
