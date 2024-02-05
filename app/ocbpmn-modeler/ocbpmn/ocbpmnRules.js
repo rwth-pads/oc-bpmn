@@ -55,14 +55,14 @@ function canConnect(source, target) {
     return;
   }
 
-  // allow custom connection from 'ocbpmn:hexagon' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
-  if (source.type === 'ocbpmn:hexagon') {
-    if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
-      return { type: 'ocbpmn:connection' }; 
-    } else {
+  // allow custom connection from 'ocbpmn:hexagon' or 'bpmn:Activity' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
+if (source.type === 'ocbpmn:hexagon' || source.type === 'bpmn:Task') {
+  if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
+    return { type: 'ocbpmn:connection' }; 
+  } else {
     return false;
-    }
   }
+}
 
   // allow connection from 'ocbpmn:hexagon' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
   //if (source.type === 'ocbpmn:hexagon') {
