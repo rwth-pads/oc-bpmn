@@ -1,7 +1,7 @@
 
 # bpmn-js: Object-Centric Custom Shapes (ocbpmn)
 
-This tool support for OC-BPMN extends [bpmn-js](https://github.com/bpmn-io/bpmn-js) with new shapes and connections that are __not part of the BPMN 2.0 diagram / incompatible with the BPMN 2.0 standard__. It is based on [bpmn-js-example-custom-shapes](https://github.com/bpmn-io/bpmn-js-example-custom-shapes)
+This tool support for OC-BPMN extends [bpmn-js](https://github.com/bpmn-io/bpmn-js) with new shapes and connections that are __not part of the BPMN 2.0 diagram / incompatible with the BPMN 2.0 standard__. It is based on [bpmn-js-example-custom-shapes](https://github.com/bpmn-io/bpmn-js-example-custom-shapes).
 
 ## About
 
