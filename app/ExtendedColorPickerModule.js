@@ -12,7 +12,7 @@ class ExtendedColorPopupProvider extends ColorPopupProvider {
           {
             label: 'Default',
             fill: '#ffffff',
-            stroke: '#000000'
+            stroke: '#22242A'
           },
           {
             label: 'EmergeRed',
@@ -31,7 +31,7 @@ class ExtendedColorPopupProvider extends ColorPopupProvider {
           },
           {
             label: 'EmergeYellow',
-            fill: '#FFFF00', // Yellow fill
+            fill: '#fdff8f', // Yellow fill
             stroke: '#FFD700' // Gold stroke
           },
           {

@@ -55,14 +55,23 @@ function canConnect(source, target) {
     return;
   }
 
-  // allow connection from 'ocbpmn:hexagon' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
-  if (source.type === 'ocbpmn:hexagon') {
-    if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
-      return { type: 'bpmn:SequenceFlow' };
-    } else {
-     return false;
-    }
+  // allow custom connection from 'ocbpmn:hexagon' or 'bpmn:Activity' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
+if (source.type === 'ocbpmn:hexagon' || source.type === 'bpmn:Task') {
+  if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
+    return { type: 'ocbpmn:connection' }; 
+  } else {
+    return false;
   }
+}
+
+  // allow connection from 'ocbpmn:hexagon' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
+  //if (source.type === 'ocbpmn:hexagon') {
+    //if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
+      //return { type: 'bpmn:SequenceFlow' };
+    //} else {
+     //return false;
+    //}
+  //}
 
   // allow connection from 'ocbpmn:join' to 'bpmn:Task', 'ocbpmn:hexagon', or 'bpmn:Event'
   if (source.type === 'ocbpmn:join') {
@@ -113,14 +122,14 @@ function canConnect(source, target) {
     //var shape = context.shape;
   
     //if (isocbpmn(shape)) {
-      // Allow resize if the shape is a 'join'
-      //if (shape.type === 'ocbpmn:join') {
-        //return true;
+      // Allow resize if the shape is a 'hexagon'
+      //if (shape.type === 'ocbpmn:hexagon') {
+       //   return true;
       //}
   
       // Cannot resize other ocbpmn elements
-      //return false;
-    //}
+     // return false;
+ // }
   //});
 
   this.addRule('connection.create', HIGH_PRIORITY, function(context) {
