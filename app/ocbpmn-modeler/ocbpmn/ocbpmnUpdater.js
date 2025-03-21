@@ -19,6 +19,8 @@ import {
  */
 export default function ocbpmnUpdater(eventBus, modeling, bpmnjs) {
 
+    //TODO to update color after change etc look here i think
+
   CommandInterceptor.call(this, eventBus);
 
   function updateocbpmnElement(e) {

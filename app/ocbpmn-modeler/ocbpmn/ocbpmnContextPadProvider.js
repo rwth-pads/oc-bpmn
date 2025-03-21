@@ -11,6 +11,62 @@ import {
   bind
 } from 'min-dash';
 
+//my edit....
+//import ColorPicker from 'bpmn-js-color-picker';
+/*
+export default function ocbpmnContextPadProvider(contextPad, popupMenu, canvas, injector, connect, translate) {
+
+    injector.invoke(ContextPadProvider, this);
+
+    var cached = bind(this.getContextPadEntries, this);
+
+    this.getContextPadEntries = function(element) {
+        var actions = cached(element);
+
+        var businessObject = element.businessObject;
+
+        function startConnect(event, element, autoActivate) {
+            connect.start(event, element, autoActivate);
+        }
+
+        //TODO change this for intermediate OF arcs ?
+        if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'ocbpmn:oval' ])) {
+            assign(actions, {
+                'connect': {
+                    group: 'connect',
+                    className: 'bpmn-icon-connection-multi',
+                    title: translate('Connect using ocbpmn connection'),
+                    action: {
+                        click: startConnect,
+                        dragstart: startConnect
+                    }
+                },
+                'color-picker': {
+                    group: 'edit',
+                    className: 'bpmn-icon-color',
+                    title: translate('Set color'),
+                    action: {
+                        click: function (event, element) {
+                            ColorPicker.open(event, element);
+                        }
+                    }
+                }
+            });
+        }
+
+        return actions;
+    };
+}
+
+inherits(ocbpmnContextPadProvider, ContextPadProvider);
+
+ocbpmnContextPadProvider.$inject = [
+    'injector',
+    'connect',
+    'translate'
+];
+*/
+//original ocbpmn
 
 export default function ocbpmnContextPadProvider(injector, connect, translate) {
 
@@ -27,7 +83,8 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
       connect.start(event, element, autoActivate);
     }
 
-    if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join' ])) {
+    //TODO change this for intermediate OF arcs ?
+    if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'ocbpmn:oval' ])) {
       assign(actions, {
         'connect': {
           group: 'connect',
@@ -52,3 +109,4 @@ ocbpmnContextPadProvider.$inject = [
   'connect',
   'translate'
 ];
+

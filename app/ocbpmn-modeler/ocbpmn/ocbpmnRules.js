@@ -64,6 +64,18 @@ if (source.type === 'ocbpmn:hexagon' || source.type === 'bpmn:Task') {
   }
 }
 
+// "obj node" oval can connect to activities and other obj nodes
+if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
+    if (target.type === 'ocbpmn:oval' || target.type === 'bpmn:Task'){
+        return { type: 'ocbpmn:connection' };
+    } else {
+        return false;
+    }
+}
+// TODO probably need to add an OF symbol to pop up window to differentiate OF from CF
+//  and allow intermediate OF task to task con
+//if (source.type === 'bpmn:Task'){}
+
   // allow connection from 'ocbpmn:hexagon' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
   //if (source.type === 'ocbpmn:hexagon') {
     //if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
@@ -75,7 +87,8 @@ if (source.type === 'ocbpmn:hexagon' || source.type === 'bpmn:Task') {
 
   // allow connection from 'ocbpmn:join' to 'bpmn:Task', 'ocbpmn:hexagon', or 'bpmn:Event'
   if (source.type === 'ocbpmn:join') {
-    if (target.type === 'bpmn:Task' || target.type === 'ocbpmn:hexagon' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
+    if (target.type === 'bpmn:Task' || target.type === 'ocbpmn:hexagon' || target.type.startsWith('bpmn:')
+        && target.type.endsWith('Event')) {
      return { type: 'bpmn:SequenceFlow' };
     } else {
      return false;

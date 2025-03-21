@@ -55,7 +55,7 @@ class ExtendedColorPopupProvider extends ColorPopupProvider {
             stroke: '#FFD700' // Gold stroke
           }
         ];
-      
+
         const newEntries = newColors.map(color => ({
           title: this._translate(color.label),
           id: color.label.toLowerCase() + '-color',

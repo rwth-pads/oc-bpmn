@@ -13,52 +13,193 @@ import {
   create as svgCreate
 } from 'tiny-svg';
 
-var COLOR_GREEN = '#52B415',
-  COLOR_RED = '#cc0000',
-  COLOR_YELLOW = '#ffc800';
+//me import
+import {
+    black,
+    getFillColor,
+    getStrokeColor
+} from "bpmn-js/lib/draw/BpmnRenderUtil";
+import {query as domQuery} from "min-dom";
+
+
+var COLOR_GREEN  = '#52B415',
+    COLOR_RED    = '#cc0000',
+    COLOR_YELLOW = '#ffc800';
+
 
 /**
  * A renderer that knows how to render ocbpmn elements.
  */
-export default function ocbpmnRenderer(eventBus, styles) {
+export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
-  BaseRenderer.call(this, eventBus, 2000);
+    BaseRenderer.call(this, eventBus, 2000);
+    /*
 
-  var computeStyle = styles.computeStyle;
-
-  //hexagonv01
-
-// _createAction(elements, color) {
-//   return () => {
-//     const modeling = this._modeling;
-//     const elementRegistry = this._elementRegistry;
-
-//     elements.forEach(element => {
-//       if (element.type === 'ocbpmn:hexagon') {
-//         // Get the SVG element of the hexagon
-//         const gfx = elementRegistry.getGraphics(element);
-
-//         // Change the fill color of the fill path and the stroke color of the stroke path
-//         const paths = gfx.selectAll('path');
-//         const fillPath = paths[0];
-//         const strokePath = paths[1];
-//         fillPath.attr('fill', color.fill);
-//         strokePath.attr('stroke', color.stroke);
-//       } else {
-//         // Change the color of the element
-//         modeling.setColor(elements, {
-//           fill: color.fill,
-//           stroke: color.stroke
-//         });
-//       }
-//     });
-//   };
-// }
+    //function lineStyle(attrs) {
+    //     return styles.computeStyle(attrs, [ 'no-fill' ], {
+    //       strokeLinecap: 'round',
+    //       strokeLinejoin: 'round',
+    //       stroke: black,
+    //       strokeWidth: 2
+    //     });
+    //   } */
 
 
-  //hexagonv02 because of difficulties with browser handling svg strokes
-  this.drawHexagon = function(p, width, height, color = { fill: '#6691FF', stroke: '#0048FF' }) {
-    var svgString = `
+   // var markers = {};
+
+    var computeStyle = styles.computeStyle;
+    /*
+        function ocbpmnShapeStyle(attrs) {
+            return styles.computeStyle(attrs, {
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                stroke: COLOR_RED,
+                strokeWidth: 2,
+                fill: COLOR_GREEN
+            });
+        }
+
+        function ocbpmnLineStyle(attrs) {
+            return styles.computeStyle(attrs, [ 'no-fill' ], {
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                stroke: COLOR_YELLOW,
+                strokeWidth: 2,
+            });
+        }
+
+        // 3. create <marker> svg element and append the triangle markerEnd <path> to it
+        function addMarker(id, options) {
+            var {
+                ref = {x: 0, y: 0},
+                scale = 1,
+                element
+            } = options;
+
+            var marker = svgCreate('marker', {
+                id: id,
+                viewBox: '0 0 20 20',
+                refX: ref.x,
+                refY: ref.y,
+                markerWidth: 20 * scale,
+                markerHeight: 20 * scale,
+                orient: 'auto'
+            });
+
+            svgAppend(marker, element);
+
+            //var defs = domQuery('defs', canvas._svg);
+
+            //if (!defs) {
+              //  defs = svgCreate('defs');
+                // TODO <defs>
+              //  svgAppend(canvas._svg, defs);
+            //}
+
+          //  svgAppend(defs, marker);
+
+
+            markers[id] = marker;
+        }
+
+
+        function colorEscape(str) {
+
+            // only allow characters and numbers
+            return str.replace(/[^0-9a-zA-Z]+/g, '_');
+        }
+
+        // 1. create ID for marker type and create the marker if not registered yet and return its URL
+        function ocbpmnMarker(type, fill, stroke) {
+            var id = type + '-' + colorEscape(fill) + '-' + colorEscape(stroke);
+
+            if (!markers[id]) {
+                createOcbpmnMarker(id, type, fill, stroke);
+            }
+
+            return 'url(#' + id + ')';
+        }
+
+        // 2. create the markerEnd svg image
+        function createOcbpmnMarker(id, type, fill, stroke) {
+
+            if (type === 'object-flow') {
+                // create triangular shape marker end path svg
+                var objFlowEnd = svgCreate('path', {
+                    id: 'markerEnd-path',
+                    d: 'M 1 5 L 11 10 L 1 15 Z',
+                    ...ocbpmnShapeStyle({
+                        fill: stroke,
+                        stroke: stroke,
+                        strokeWidth: 1.5
+                    })
+                });
+
+                addMarker(id, {
+                    element: objFlowEnd,
+                    ref: {x: 11, y: 10},
+                    scale: 0.5
+                });
+
+
+            var marker = svgCreate('marker', {
+                id: id,
+                viewBox: '0 0 20 20',
+                refX: 11,
+                refY: 10,
+                markerWidth: 10,
+                markerHeight: 10,
+                orient: 'auto'
+            });
+
+            svgAppend(marker, objFlowEnd);
+
+            markers[id] = marker;
+        }
+    }
+    */
+
+        //var defaultFillColor = BpmnRendererConfig && BpmnRendererConfig.defaultFillColor;
+        //var defaultStrokeColor = BpmnRendererConfig && BpmnRendererConfig.defaultStrokeColor;
+        /* //hexagonv01
+
+      // _createAction(elements, color) {
+      //   return () => {
+      //     const modeling = this._modeling;
+      //     const elementRegistry = this._elementRegistry;
+
+      //     elements.forEach(element => {
+      //       if (element.type === 'ocbpmn:hexagon') {
+      //         // Get the SVG element of the hexagon
+      //         const gfx = elementRegistry.getGraphics(element);
+
+      //         // Change the fill color of the fill path and the stroke color of the stroke path
+      //         const paths = gfx.selectAll('path');
+      //         const fillPath = paths[0];
+      //         const strokePath = paths[1];
+      //         fillPath.attr('fill', color.fill);
+      //         strokePath.attr('stroke', color.stroke);
+      //       } else {
+      //         // Change the color of the element
+      //         modeling.setColor(elements, {
+      //           fill: color.fill,
+      //           stroke: color.stroke
+      //         });
+      //       }
+      //     });
+      //   };
+      // }
+
+      */
+        //hexagonv02 because of difficulties with browser handling svg strokes
+        //container p, width, height, optional color obj with fill and stroke with default colors
+        this.drawHexagon = function (p, width, height, color = {fill: '#6691FF', stroke: '#0048FF'}) {
+            // svg string: width, height set dynamically, viewbox: def coord syst for drawing
+            // path class fill-path: draws main filled hexagon, d drawing commands.. M25 22 = move to top right etc
+            // path class stroke-path: creates outline
+            // clip path: restricts drawing within spec rectangle
+            // g: group svg elements together (two path elem here), clip-path url restricts clipping mask to def rectangular area
+            var svgString = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 26 30" fill="none">
         <g clip-path="url(#clip0_2_2)">
         <path class="fill-path" d="M25 22L13 29L1 22V8L13 1L25 8V22Z" fill="${color.fill}"/>
@@ -71,203 +212,506 @@ export default function ocbpmnRenderer(eventBus, styles) {
         </defs>
       </svg>
     `;
-  
-    p.innerHTML = svgString;
-  
-    return p;
-  };
+            // svg string inserted into container p
+            p.innerHTML = svgString;
 
+            return p;
+        };
 
-  this.drawJoin = function (p, width, height) {
-    var svgString = `
+        this.drawJoin = function (p, width, height) {
+            var svgString = `
     <svg xmlns="http://www.w3.org/2000/svg" width="37" height="42" viewBox="0 0 37 42" fill="none">
     <path d="M0.75 40.7119V1.28806L35.4806 21L0.75 40.7119Z" fill="white" stroke="#22242A" stroke-width="2.5"/>
     </svg>
     `;
-  
-    p.innerHTML = svgString;
-  
-    return p;
-  };
-  
 
-  this.drawTriangle = function (p, side) {
-    var halfSide = side / 2,
-      points,
-      attrs;
+            p.innerHTML = svgString;
 
-    points = [halfSide, 0, side, side, 0, side];
+            return p;
+        };
 
-    attrs = computeStyle(attrs, {
-      stroke: COLOR_GREEN,
-      strokeWidth: 2,
-      fill: COLOR_GREEN
-    });
+        this.drawOval = function (p, width, height, color = {fill: '#6691FF', stroke: '#0048FF'}) {
+            /* var cx = width / 2,
+                cy = height / 2;
 
-    var polygon = svgCreate('polygon');
+            // Define your style attributes (using your existing computeStyle function)
+            var attrs = computeStyle({}, {
+                stroke: COLOR_YELLOW,
+                strokeWidth: 4,
+                //fill: COLOR_YELLOW
+                fill: color
+            });
 
-    svgAttr(polygon, {
-      points: points
-    });
+            // Create an ellipse element
+            var ellipse = svgCreate('ellipse');
 
-    svgAttr(polygon, attrs);
+            // Set the ellipse's attributes
+            svgAttr(ellipse, {
+                cx: cx,
+                cy: cy,
+                rx: width / 2,
+                ry: height / 2
+            });
 
-    svgAppend(p, polygon);
+            // Apply the style attributes
+            svgAttr(ellipse, attrs);
 
-    return polygon;
-  };
+            // Append the ellipse to the parent element
+            svgAppend(p, ellipse);
 
-  this.getTrianglePath = function(element) {
-    var x = element.x,
-      y = element.y,
-      width = element.width,
-      height = element.height;
+            return ellipse; */
 
-    var trianglePath = [
-      [ 'M', x + width / 2, y ],
-      [ 'l', width / 2, height ],
-      [ 'l', -width, 0 ],
-      [ 'z' ]
-    ];
+            var svgString = `
+        <svg xmlns="http://www.w3.org/2000/svg" id="myOval" width="${width}" height="${height}" viewBox="0 0 ${width + 2} ${height + 2}" fill="none">
+            <ellipse cx="${width / 2}" cy="${height / 2}" rx="${width / 2}" ry="${height / 2}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="2"/>
+        </svg>
+        `;
 
-    return componentsToPath(trianglePath);
-  };
+            p.innerHTML = svgString;
 
-  this.drawCircle = function(p, width, height) {
-    var cx = width / 2,
-      cy = height / 2;
+            return p;
+        };
+        /*
+            this.getOvalPath = function(shape) {
+                var cx = shape.x + shape.width / 2,
+                    cy = shape.y + shape.height / 2,
+                    rx = shape.width / 2,
+                    ry = shape.height / 2;
 
-    var attrs = computeStyle(attrs, {
-      stroke: COLOR_YELLOW,
-      strokeWidth: 4,
-      fill: COLOR_YELLOW
-    });
+                // Build the path commands:
+                // Start at the top center of the ellipse
+                // Draw an arc down to the bottom, then another back to the start.
+                var ellipsePath = [
+                    ['M', cx, cy - ry],
+                    ['a', rx, ry, 0, 1, 0, 0, 2 * ry],
+                    ['a', rx, ry, 0, 1, 0, 0, -2 * ry],
+                    ['z']
+                ];
 
-    var circle = svgCreate('circle');
+                return componentsToPath(ellipsePath);
+            };
 
-    svgAttr(circle, {
-      cx: cx,
-      cy: cy,
-      r: Math.round((width + height) / 4)
-    });
+        */
 
-    svgAttr(circle, attrs);
+        this.drawTriangle = function (p, side) {
+            var halfSide = side / 2,
+                points,
+                attrs;
 
-    svgAppend(p, circle);
+            points = [halfSide, 0, side, side, 0, side];
 
-    return circle;
-  };
+            attrs = computeStyle(attrs, {
+                stroke: COLOR_GREEN,
+                strokeWidth: 2,
+                fill: COLOR_GREEN
+            });
 
-  this.getCirclePath = function(shape) {
-    var cx = shape.x + shape.width / 2,
-        cy = shape.y + shape.height / 2,
-        radius = shape.width / 2;
+            var polygon = svgCreate('polygon');
 
-    var circlePath = [
-      [ 'M', cx, cy ],
-      [ 'm', 0, -radius ],
-      [ 'a', radius, radius, 0, 1, 1, 0, 2 * radius ],
-      [ 'a', radius, radius, 0, 1, 1, 0, -2 * radius ],
-      [ 'z' ]
-    ];
+            svgAttr(polygon, {
+                points: points
+            });
 
-    return componentsToPath(circlePath);
-  };
+            svgAttr(polygon, attrs);
 
-  this.drawocbpmnConnection = function(p, element) {
-    // Use custom colors if available, otherwise default to red
-    const customColors = element.businessObject.customColors || { stroke: '#22242A' };
-    var attrs = computeStyle(attrs, {
-      stroke: customColors.stroke,
-      strokeWidth: 2
-    });
+            svgAppend(p, polygon);
 
-    return svgAppend(p, createLine(element.waypoints, attrs));
-};
+            return polygon;
+        };
 
-  this.getocbpmnConnectionPath = function(connection) {
-    var waypoints = connection.waypoints.map(function(p) {
-      return p.original || p;
-    });
+        this.getTrianglePath = function (element) {
+            var x = element.x,
+                y = element.y,
+                width = element.width,
+                height = element.height;
 
-    var connectionPath = [
-      [ 'M', waypoints[0].x, waypoints[0].y ]
-    ];
+            var trianglePath = [
+                ['M', x + width / 2, y],
+                ['l', width / 2, height],
+                ['l', -width, 0],
+                ['z']
+            ];
 
-    waypoints.forEach(function(waypoint, index) {
-      if (index !== 0) {
-        connectionPath.push([ 'L', waypoint.x, waypoint.y ]);
-      }
-    });
+            return componentsToPath(trianglePath);
+        };
 
-    return componentsToPath(connectionPath);
-  };
-}
+        this.drawCircle = function (p, width, height) {
+            var cx = width / 2,
+                cy = height / 2;
 
-inherits(ocbpmnRenderer, BaseRenderer);
+            var attrs = computeStyle(attrs, {
+                stroke: COLOR_YELLOW,
+                strokeWidth: 4,
+                fill: COLOR_YELLOW
+            });
 
-ocbpmnRenderer.$inject = [ 'eventBus', 'styles' ];
+            var circle = svgCreate('circle');
+
+            svgAttr(circle, {
+                cx: cx,
+                cy: cy,
+                r: Math.round((width + height) / 4)
+            });
+
+            svgAttr(circle, attrs);
+
+            svgAppend(p, circle);
+
+            return circle;
+        };
+
+        this.getCirclePath = function (shape) {
+            var cx = shape.x + shape.width / 2,
+                cy = shape.y + shape.height / 2,
+                radius = shape.width / 2;
+
+            var circlePath = [
+                ['M', cx, cy],
+                ['m', 0, -radius],
+                ['a', radius, radius, 0, 1, 1, 0, 2 * radius],
+                ['a', radius, radius, 0, 1, 1, 0, -2 * radius],
+                ['z']
+            ];
+
+            return componentsToPath(circlePath);
+        };
+
+        /*
+      this.drawocbpmnConnection = function(p, element) {
+        // Use custom colors if available, otherwise default to red
+        //const customColors = element.businessObject.customColors || { stroke: '#22242A' };
+        var attrs = computeStyle(attrs, {
+          //stroke: customColors.stroke,
+          //stroke: COLOR_RED,
+          //strokeWidth: 2
+            strokeLinecap: '',
+            strokeLinejoin: '',
+            //stroke: p.stroke.color,
+            strokeWidth: 2,
+            fill: p.getFillColor(element),
+            stroke: p.getStrokeColor(element),
+            //markerEnd: marker('sequenceflow-end',)
+
+        });
+
+        return svgAppend(p, createLine(element.waypoints, attrs));
+    }; */
+        /*
+        function myMarker(options) {
+            var {
+                ref = {x: 0, y: 0},
+                scale = 1,
+                element
+            } = options;
+
+            var ofMarker = svgCreate("marker", {
+                id: 'of-triangle',
+                viewBox: '0 0 20 20',
+                refX: ref.x,
+                refY: ref.y,
+                markerWidth: 20 * scale,
+                markerHeight: 20 * scale,
+                orient: 'auto'
+
+            });
+
+            //append marker to element (ofEnd)
+            svgAppend(ofMarker, element); */
+        /*
+            //idk what this does and why it's needed
+            var defs = domQuery('defs', canvas._svg);
+
+            if (!defs) {
+                defs = svgCreate('defs');
+
+                svgAppend(canvas._svg, defs);
+            }
+
+            svgAppend(defs, ofMarker);
+
+            //then markers array but no need rn...
+        */
+
+        /*
+        function createOfMarker(fill, stroke) {
+            var ofEnd = svgCreate("path", {
+                d: 'M 1 5 L 11 10 L 1 15 Z',
+                ...computeStyle({
+                    fill: fill,
+                    stroke: stroke,
+                    strokeWidth: 1
+                    })
+            });
+            myMarker({
+                element: ofEnd,
+                ref: {x: 11, y: 10},
+                scale: 0.5
+            });
+
+            return "url(#of-triangle)";
+        }
+        */
+
+    /*
+            this.drawocbpmnConnection = function (p, element, color = {fill: '#6691FF', stroke: '#0048FF'}) {
+
+                // 1. draw connection line
+                var connection = createLine(element.waypoints, {
+                    color,
+                    markerEnd: ocbpmnMarker('object-flow', color.fill, color.stroke)
+                });
+
+                // add defs to <p> if non existent rn
+                var defs = p.closest('svg').querySelector('defs');
+                if (!defs) {
+                    defs = svgCreate('defs');
+                    svgAppend(p.closest('svg'), defs);
+                }
+                //svgAppend(defs, marker);
+
+                return connection;
+
+                var defs = p.closest('svg').querySelector('defs');
+                if (!defs) {
+                    defs = svgCreate('defs');
+                    svgAppend(p.closest('svg'), defs);
+                }
 
 
-ocbpmnRenderer.prototype.canRender = function(element) {
-  return /^ocbpmn:/.test(element.type);
-};
+            }; */
 
-ocbpmnRenderer.prototype.drawShape = function(p, element) {
-  var type = element.type;
-
-  if (type === 'ocbpmn:hexagon') {
-    return this.drawHexagon(p, element.width, element.height);
-  }
-
-  if (type === 'ocbpmn:join') {
-    return this.drawJoin(p, element.width, element.height);
-  }
-
-  if (type === 'ocbpmn:triangle') {
-    return this.drawTriangle(p, element.width);
-  }
-
-  if (type === 'ocbpmn:circle') {
-    return this.drawCircle(p, element.width, element.height);
-  }
-};
-
-ocbpmnRenderer.prototype.getShapePath = function(shape) {
-  var type = shape.type;
-
-  //if (type === 'ocbpmn:hexagon') {
-    //return this.getHexagonPath(shape);
-  //}
-
-  //if (type === 'ocbpmn:join') {
-    //return this.getJoinPath(shape);
-  //}
-
-  if (type === 'ocbpmn:triangle') {
-    return this.getTrianglePath(shape);
-  }
-
-  if (type === 'ocbpmn:circle') {
-    return this.getCirclePath(shape);
-  }
-};
-
-ocbpmnRenderer.prototype.drawConnection = function(p, element) {
-
-  var type = element.type;
-
-  if (type === 'ocbpmn:connection') {
-    return this.drawocbpmnConnection(p, element);
-  }
-};
+        this.drawocbpmnConnection = function (p, element, color = {fill: '#000000', stroke: '#000000'}) {
+            /* var attrs = computeStyle(attrs, {
+                 fill: 'fill',
+                 stroke: 'stroke'
+                 //strokeWidth: 2
+             });
+             //to do
+             var fill = COLOR_RED;
+             var stroke = COLOR_RED;
 
 
-ocbpmnRenderer.prototype.getConnectionPath = function(connection) {
 
-  var type = connection.type;
+             return svgAppend(p, createLine(element.waypoints, {markerEnd: createOfMarker(fill, stroke),
+                 stroke}, 5));
+                 */
+            // TODO look into updater etc how to access context source, target etc to get the same color
+            // var strokeColor = getStrokeColor(element, COLOR_RED, attrs.stroke || COLOR_RED);
+            // var fillColor = getFillColor(element, COLOR_YELLOW, attrs.fill || COLOR_YELLOW);
 
-  if (type === 'ocbpmn:connection') {
-    return this.getocbpmnConnectionPath(connection);
-  }
-};
+
+            // style for line
+            var attrs = computeStyle(attrs, {
+                id: 'ofCon-path',
+                fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
+                stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
+                strokeWidth: 2,
+                strokeLinecap: 'round',
+                strokeDasharray: '0, 5',
+                markerEnd: 'url(#ofEnd)'
+            });
+
+            // create the connection line
+
+            //var connection = createLine(element.waypoints, attrs, 5);
+            //no radius ?
+            var connection = createLine(element.waypoints, attrs);
+            svgAppend(p, connection);
+
+            // check if marker already exists
+            var defs = p.closest('svg').querySelector('defs');
+            if (!defs) {
+                defs = svgCreate('defs');
+                svgAppend(p.closest('svg'), defs);
+             }
+
+            // create marker svg element with id=#ofEnd if there is no such elem yet
+            if (!defs.querySelector('#ofEnd')) {
+                // marker svg elem
+                var marker = svgCreate('marker', {
+                    id: 'ofEnd',
+                    viewBox: '0 0 20 20',
+                    refX: 11,
+                    refY: 10,
+                    markerWidth: 10,
+                    markerHeight: 10,
+                    orient: 'auto'
+                });
+
+
+                // create triangle path shape for marker
+
+                var markerPath = svgCreate("path");
+                svgAttr(markerPath, {
+                    id: 'ofMarker-path',
+                    d: 'M 1 5 L 11 10 L 1 15 Z', //triangle
+                    fill: color.fill,
+                    stroke: color.stroke,
+                    strokeWidth: 1,
+
+                });
+
+                svgAppend(marker, markerPath); // add path how to draw marker #ofEnd to marker svg element
+                svgAppend(defs, marker); // add marker element to defs of svg of p (parentnode)
+            }
+
+            /*
+                    // neue reihenfolge
+
+                    var attrs =
+                    var connection = createLine(element.waypoints, attrs, 5);
+                    svgAppend(p, connection);
+
+                    // create triangle marker
+                    var markerPath = svgCreate("path");
+                    svgAttr(markerPath, {
+                        d: 'M 1 5 L 11 10 L 1 15 Z', //triangle
+                        fill: strokeColor,
+                        stroke: strokeColor,
+                        strokeWidth: 1
+
+                    });
+
+                    var marker = svgCreate('marker', {
+                        id: 'ofEnd',
+                        viewBox: '0 0 20 20',
+                        refX: 11,
+                        refY: 10,
+                        markerWidth: 10,
+                        markerHeight: 10,
+                        orient: 'auto'
+                    });
+
+                    //add path to marker element
+                    svgAppend(marker, markerPath); // add path how to draw marker #ofEnd to marker svg element
+
+                    // add defs to svg
+                    var defs = p.closest('svg').querySelector('defs');
+                    if (!defs){
+                        defs = svgCreate('defs');
+                        svgAppend(p.closest('svg'), defs);
+                    }
+
+                    //add marker to defs
+                    svgAppend(defs, marker); // add marker element to defs of svg of p (parentnode)
+                    //}
+            */
+
+            return connection;
+        };
+
+
+
+        this.getocbpmnConnectionPath = function (connection) {
+            var waypoints = connection.waypoints.map(function (p) {
+                return p.original || p;
+            });
+
+            var connectionPath = [
+                ['M', waypoints[0].x, waypoints[0].y]
+            ];
+
+            waypoints.forEach(function (waypoint, index) {
+                if (index !== 0) {
+                    connectionPath.push(['L', waypoint.x, waypoint.y]);
+                }
+            });
+
+            return componentsToPath(connectionPath);
+        };
+
+    }
+
+    inherits(ocbpmnRenderer, BaseRenderer);
+
+    ocbpmnRenderer.$inject = ['eventBus', 'styles'];
+
+
+    ocbpmnRenderer.prototype.canRender = function (element) {
+        return /^ocbpmn:/.test(element.type);
+    };
+
+    ocbpmnRenderer.prototype.drawShape = function (p, element) {
+        var type = element.type;
+
+        if (type === 'ocbpmn:hexagon') {
+            return this.drawHexagon(p, element.width, element.height);
+        }
+
+        if (type === 'ocbpmn:join') {
+            return this.drawJoin(p, element.width, element.height);
+        }
+
+        if (type === 'ocbpmn:triangle') {
+            return this.drawTriangle(p, element.width);
+        }
+
+        if (type === 'ocbpmn:circle') {
+            return this.drawCircle(p, element.width, element.height);
+        }
+
+        if (type === 'ocbpmn:oval') {
+            return this.drawOval(p, element.width, element.height);
+        }
+    };
+
+    ocbpmnRenderer.prototype.getShapePath = function (shape) {
+        var type = shape.type;
+
+        //if (type === 'ocbpmn:hexagon') {
+        //return this.getHexagonPath(shape);
+        //}
+
+        //if (type === 'ocbpmn:join') {
+        //return this.getJoinPath(shape);
+        //}
+
+        if (type === 'ocbpmn:triangle') {
+            return this.getTrianglePath(shape);
+        }
+
+        if (type === 'ocbpmn:circle') {
+            return this.getCirclePath(shape);
+        }
+        /*
+          if (type === 'ocbpmn:oval') {
+              return this.getOvalPath(shape);
+          }*/
+    };
+
+    ocbpmnRenderer.prototype.drawConnection = function (p, element) {
+
+        var type = element.type;
+
+        if (type === 'ocbpmn:connection') {
+            return this.drawocbpmnConnection(p, element);
+        }
+    };
+
+
+    ocbpmnRenderer.prototype.getConnectionPath = function (connection) {
+
+        var type = connection.type;
+
+        if (type === 'ocbpmn:connection') {
+            return this.getocbpmnConnectionPath(connection);
+        }
+    };
+
+    /**
+     * Pick attributes if they exist. Copied from BpmnRenderer.js
+     *
+     * @param {Object} attrs
+     * @param {string[]} keys
+     *
+     * @returns {Object}
+     */
+    function pickAttrs(attrs, keys = []) {
+        return keys.reduce((pickedAttrs, key) => {
+            if (attrs[key]) {
+                pickedAttrs[key] = attrs[key];
+            }
+
+            return pickedAttrs;
+        }, {});
+    }
