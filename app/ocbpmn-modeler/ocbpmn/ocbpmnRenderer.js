@@ -503,7 +503,7 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             // style for line
             var attrs = computeStyle(attrs, {
                 id: 'ofCon-path',
-                fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
+            //    fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
                 stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
                 strokeWidth: 2,
                 strokeLinecap: 'round',

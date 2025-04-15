@@ -27,7 +27,7 @@ export default function ChangeColor(modeler) {
                 // var svgOcConMarker = ocCon.querySelector("#ofMarker-path"); // = null
                 if (svgOcConLine) {
                     //svgOcConLine.setAttribute('fill', colors.fill);
-                    svgOcConLine.style.fill = colors.fill;
+                    //svgOcConLine.style.fill = colors.fill;
                     //svgOcConLine.setAttribute('stroke', colors.stroke);
                     svgOcConLine.style.stroke = colors.stroke;
                 }
