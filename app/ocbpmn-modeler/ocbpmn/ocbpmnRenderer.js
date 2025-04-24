@@ -230,16 +230,17 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             return p;
         };
 
-        this.drawOval = function (p, width, height, color = {fill: '#6691FF', stroke: '#0048FF'}) {
-            /* var cx = width / 2,
-                cy = height / 2;
+        this.drawOval = function (element, p, width, height, color = {fill: '#6691FF', stroke: '#0048FF'}) {
+
+             var cx = width / 2,
+                 cy = height / 2;
 
             // Define your style attributes (using your existing computeStyle function)
             var attrs = computeStyle({}, {
-                stroke: COLOR_YELLOW,
-                strokeWidth: 4,
+                stroke: element.businessObject?.customColors?.stroke || color.stroke,
+                strokeWidth: 2,
                 //fill: COLOR_YELLOW
-                fill: color
+                fill: element.businessObject?.customColors?.fill || color.fill
             });
 
             // Create an ellipse element
@@ -259,17 +260,20 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             // Append the ellipse to the parent element
             svgAppend(p, ellipse);
 
-            return ellipse; */
-
+            return ellipse;
+/*<ellipse cx="${width / 2}" cy="${height / 2}" rx="${width / 2}" ry="${height / 2}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="2"/>
             var svgString = `
         <svg xmlns="http://www.w3.org/2000/svg" id="myOval" width="${width}" height="${height}" viewBox="0 0 ${width + 2} ${height + 2}" fill="none">
-            <ellipse cx="${width / 2}" cy="${height / 2}" rx="${width / 2}" ry="${height / 2}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="2"/>
+
+            <ellipse cx="${width / 2}" cy="${height / 2}" rx="${width / 2}" ry="${height / 2}" fill="${color.fill}" stroke="${element.businessObject?.customColors?.stroke || color.stroke}" stroke-width="2"/>
         </svg>
         `;
 
             p.innerHTML = svgString;
 
             return p;
+            */
+
         };
         /*
             this.getOvalPath = function(shape) {
@@ -495,7 +499,7 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
              return svgAppend(p, createLine(element.waypoints, {markerEnd: createOfMarker(fill, stroke),
                  stroke}, 5));
                  */
-            // TODO look into updater etc how to access context source, target etc to get the same color
+
             // var strokeColor = getStrokeColor(element, COLOR_RED, attrs.stroke || COLOR_RED);
             // var fillColor = getFillColor(element, COLOR_YELLOW, attrs.fill || COLOR_YELLOW);
 
@@ -504,7 +508,8 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             var attrs = computeStyle(attrs, {
                 id: 'ofCon-path',
             //    fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
-                stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
+                //stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
+                stroke: element.businessObject?.customColors?.stroke || color.stroke,
                 strokeWidth: 2,
                 strokeLinecap: 'round',
                 strokeDasharray: '0, 5',
@@ -554,48 +559,6 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
                 svgAppend(marker, markerPath); // add path how to draw marker #ofEnd to marker svg element
                 svgAppend(defs, marker); // add marker element to defs of svg of p (parentnode)
             }
-
-            /*
-                    // neue reihenfolge
-
-                    var attrs =
-                    var connection = createLine(element.waypoints, attrs, 5);
-                    svgAppend(p, connection);
-
-                    // create triangle marker
-                    var markerPath = svgCreate("path");
-                    svgAttr(markerPath, {
-                        d: 'M 1 5 L 11 10 L 1 15 Z', //triangle
-                        fill: strokeColor,
-                        stroke: strokeColor,
-                        strokeWidth: 1
-
-                    });
-
-                    var marker = svgCreate('marker', {
-                        id: 'ofEnd',
-                        viewBox: '0 0 20 20',
-                        refX: 11,
-                        refY: 10,
-                        markerWidth: 10,
-                        markerHeight: 10,
-                        orient: 'auto'
-                    });
-
-                    //add path to marker element
-                    svgAppend(marker, markerPath); // add path how to draw marker #ofEnd to marker svg element
-
-                    // add defs to svg
-                    var defs = p.closest('svg').querySelector('defs');
-                    if (!defs){
-                        defs = svgCreate('defs');
-                        svgAppend(p.closest('svg'), defs);
-                    }
-
-                    //add marker to defs
-                    svgAppend(defs, marker); // add marker element to defs of svg of p (parentnode)
-                    //}
-            */
 
             return connection;
         };
@@ -651,7 +614,7 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
         }
 
         if (type === 'ocbpmn:oval') {
-            return this.drawOval(p, element.width, element.height);
+            return this.drawOval(element, p, element.width, element.height);
         }
     };
 

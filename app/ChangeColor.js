@@ -13,28 +13,27 @@ export default function ChangeColor(modeler) {
         elements.forEach(element => {
 
             if (element.type === 'ocbpmn:oval'){
+                element.businessObject.customColors = colors;
                 var oval = elementRegistry.getGraphics(element);
                 var svgOval = oval.querySelector('ellipse');
                 if (svgOval) {
-                    svgOval.setAttribute('fill', colors.fill);
+                    svgOval.style.fill = colors.fill;
+                    svgOval.style.stroke = colors.stroke;
+                    svgOval.setAttribute('fill', colors.fill); // wenn nur setAttribute dann wird die customfarbe erst nach bewegen des elementes veraendert???
                     svgOval.setAttribute('stroke', colors.stroke);
                 }
             }
             else if (element.type === 'ocbpmn:connection'){
+                element.businessObject.customColors = colors;
                 var ocCon = elementRegistry.getGraphics(element);
                 var svgOcConLine = ocCon.querySelector("#ofCon-path");
-                //var svgOcConMarker = ocCon.querySelector("marker").closest('path');
-                // var svgOcConMarker = ocCon.querySelector("#ofMarker-path"); // = null
+
                 if (svgOcConLine) {
                     //svgOcConLine.setAttribute('fill', colors.fill);
                     //svgOcConLine.style.fill = colors.fill;
                     //svgOcConLine.setAttribute('stroke', colors.stroke);
                     svgOcConLine.style.stroke = colors.stroke;
                 }
-               // if (svgOcConMarker) {
-                  //  svgOcConMarker.setAttribute('fill', colors.fill);
-                   // svgOcConMarker.setAttribute('stroke', colors.stroke);
-               // }
 
 
             }
