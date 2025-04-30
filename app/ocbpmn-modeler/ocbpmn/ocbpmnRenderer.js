@@ -200,18 +200,18 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             // clip path: restricts drawing within spec rectangle
             // g: group svg elements together (two path elem here), clip-path url restricts clipping mask to def rectangular area
             var svgString = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 26 30" fill="none">
-        <g clip-path="url(#clip0_2_2)">
-        <path class="fill-path" d="M25 22L13 29L1 22V8L13 1L25 8V22Z" fill="${color.fill}"/>
-        <path class="stroke-path" fill-rule="evenodd" clip-rule="evenodd" d="M13 0.421143L25.5 7.71281V22.2872L13 29.5788L0.5 22.2872V7.71281L13 0.421143ZM1.5 8.80901V21.7128L12.5 28.1295V14.309L1.5 8.80901ZM13.5 14.309V28.1295L24.5 21.7128V8.80901L13.5 14.309ZM23.9497 7.96615L13 13.441L2.05034 7.96615L13 1.57885L23.9497 7.96615Z" stroke="${color.stroke}"/>
-        </g>
-        <defs>
-          <clipPath id="clip0_2_2">
-            <rect width="25.8576" height="29.8186" fill="white"/>
-          </clipPath>
-        </defs>
-      </svg>
-    `;
+            <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 26 30" fill="none">
+                <g clip-path="url(#clip0_2_2)">
+                    <path class="fill-path" d="M25 22L13 29L1 22V8L13 1L25 8V22Z" fill="${color.fill}"/>
+                    <path class="stroke-path" fill-rule="evenodd" clip-rule="evenodd" d="M13 0.421143L25.5 7.71281V22.2872L13 29.5788L0.5 22.2872V7.71281L13 0.421143ZM1.5 8.80901V21.7128L12.5 28.1295V14.309L1.5 8.80901ZM13.5 14.309V28.1295L24.5 21.7128V8.80901L13.5 14.309ZM23.9497 7.96615L13 13.441L2.05034 7.96615L13 1.57885L23.9497 7.96615Z" stroke="${color.stroke}"/>
+                </g>
+                <defs>
+                    <clipPath id="clip0_2_2">
+                        <rect width="25.8576" height="29.8186" fill="white"/>
+                    </clipPath>
+                </defs>
+            </svg>
+            `;
             // svg string inserted into container p
             p.innerHTML = svgString;
 
@@ -220,10 +220,10 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
         this.drawJoin = function (p, width, height) {
             var svgString = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="37" height="42" viewBox="0 0 37 42" fill="none">
-    <path d="M0.75 40.7119V1.28806L35.4806 21L0.75 40.7119Z" fill="white" stroke="#22242A" stroke-width="2.5"/>
-    </svg>
-    `;
+            <svg xmlns="http://www.w3.org/2000/svg" width="37" height="42" viewBox="0 0 37 42" fill="none">
+            <path d="M0.75 40.7119V1.28806L35.4806 21L0.75 40.7119Z" fill="white" stroke="#22242A" stroke-width="2.5"/>
+            </svg>
+            `;
 
             p.innerHTML = svgString;
 
@@ -261,7 +261,9 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             svgAppend(p, ellipse);
 
             return ellipse;
-/*<ellipse cx="${width / 2}" cy="${height / 2}" rx="${width / 2}" ry="${height / 2}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="2"/>
+
+        /* old ellipse without element in function args ...
+        <ellipse cx="${width / 2}" cy="${height / 2}" rx="${width / 2}" ry="${height / 2}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="2"/>
             var svgString = `
         <svg xmlns="http://www.w3.org/2000/svg" id="myOval" width="${width}" height="${height}" viewBox="0 0 ${width + 2} ${height + 2}" fill="none">
 
@@ -485,29 +487,11 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             }; */
 
         this.drawocbpmnConnection = function (p, element, color = {fill: '#000000', stroke: '#000000'}) {
-            /* var attrs = computeStyle(attrs, {
-                 fill: 'fill',
-                 stroke: 'stroke'
-                 //strokeWidth: 2
-             });
-             //to do
-             var fill = COLOR_RED;
-             var stroke = COLOR_RED;
-
-
-
-             return svgAppend(p, createLine(element.waypoints, {markerEnd: createOfMarker(fill, stroke),
-                 stroke}, 5));
-                 */
-
-            // var strokeColor = getStrokeColor(element, COLOR_RED, attrs.stroke || COLOR_RED);
-            // var fillColor = getFillColor(element, COLOR_YELLOW, attrs.fill || COLOR_YELLOW);
-
 
             // style for line
             var attrs = computeStyle(attrs, {
                 id: 'ofCon-path',
-            //    fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
+                //fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
                 //stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
                 stroke: element.businessObject?.customColors?.stroke || color.stroke,
                 strokeWidth: 2,
@@ -545,7 +529,6 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
 
                 // create triangle path shape for marker
-
                 var markerPath = svgCreate("path");
                 svgAttr(markerPath, {
                     id: 'ofMarker-path',

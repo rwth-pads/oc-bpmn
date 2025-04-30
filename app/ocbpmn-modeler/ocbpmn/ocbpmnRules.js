@@ -56,14 +56,14 @@ function canConnect(source, target) {
   }
 
   // allow custom connection from 'ocbpmn:hexagon' or 'bpmn:Activity' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
-if (source.type === 'ocbpmn:hexagon' || source.type === 'bpmn:Task') {
-  if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
-    return { type: 'ocbpmn:connection' }; 
+if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
+  if (target.type === 'ocbpmn:oval' || target.type.startsWith('bpmn:') && target.type.endsWith('Event') || target.type === 'bpmn:Task') {
+    return { type: 'ocbpmn:connection' };
   } else {
     return false;
   }
 }
-
+/*
 // "obj node" oval can connect to activities and other obj nodes
 if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
     if (target.type === 'ocbpmn:oval' || target.type === 'bpmn:Task'){
@@ -72,6 +72,14 @@ if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
         return false;
     }
 }
+
+    if (source.type === 'ocbpmn:oval' || target.type === 'ocbpmn:oval') {
+
+            return { type: 'ocbpmn:connection' };
+        } else {
+            return false;
+        }
+*/
 // TODO probably need to add an OF symbol to pop up window to differentiate OF from CF
 //  and allow intermediate OF task to task con
 //if (source.type === 'bpmn:Task'){}
@@ -111,16 +119,16 @@ if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
   this.addRule('elements.move', HIGH_PRIORITY, function(context) {
     var target = context.target,
         shapes = context.shapes;
-  
+
     var allowed = reduce(shapes, function(result, s) {
       // allow moving custom shapes
       if (isocbpmn(s)) {
         return true;
       }
-  
+
       return canCreate(s, target);
     }, undefined);
-  
+
     return allowed;
   });
 
@@ -133,13 +141,13 @@ if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
 
   //this.addRule('shape.resize', HIGH_PRIORITY, function(context) {
     //var shape = context.shape;
-  
+
     //if (isocbpmn(shape)) {
       // Allow resize if the shape is a 'hexagon'
       //if (shape.type === 'ocbpmn:hexagon') {
        //   return true;
       //}
-  
+
       // Cannot resize other ocbpmn elements
      // return false;
  // }
@@ -152,7 +160,7 @@ if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
     return canConnect(source, target);
   });
 
-  
+
 
   this.addRule('connection.reconnectStart', HIGH_PRIORITY, function(context) {
     var connection = context.connection,
