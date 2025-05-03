@@ -1,39 +1,45 @@
-function OcbpmnDirectEditingProvider(directEditing) {
-    directEditing.registerProvider(this);
-  
-    this.activate = function(element) {
-      // Check if the element is a hexagon
-      if (element.type === 'ocbpmn:hexagon') {
-        // Add a class to the text box
-        var textBox = document.querySelector('.djs-direct-editing-parent');
-        if (textBox) {
-          textBox.classList.add('hexagon-text-box');
-        }
-  
-        return {
-          bounds: {
-            x: element.x,
-            y: element.y + element.height, // position the text box under the hexagon
-            width: element.width,
-            height: 30 // set a fixed height for the text box
-          },
-          text: element.businessObject.name || ''
-        };
-      }
-    };
-  
-    this.update = function(element, text, oldText) {
-      // Check if the element is a hexagon
-      if (element.type === 'ocbpmn:hexagon') {
-        // Update the name of the business object of the element
-        element.businessObject.name = text;
-      }
-    };
-  }
-  
-  OcbpmnDirectEditingProvider.$inject = [ 'directEditing' ];
-  
-  export default {
-    __init__: [ 'ocbpmnDirectEditingProvider' ],
-    ocbpmnDirectEditingProvider: [ 'type', OcbpmnDirectEditingProvider ]
+function OcbpmnDirectEditingProvider(directEditing, eventBus) {
+  directEditing.registerProvider(this);
+
+  // activate text field for Ovals
+  this.activate = function(element) {
+    if (element.type === 'ocbpmn:oval') {
+      return {
+        bounds: {
+          x: element.x + element.width / 4, // Zentriert im Oval
+          y: element.y + element.height / 4,
+          width: element.width / 2,
+          height: 30 // Höhe des Textfelds
+        },
+        text: element.businessObject.name || ''
+      };
+    }
   };
+
+  // update the text field for Ovals
+  this.update = function(element, text) {
+    if (element.type === 'ocbpmn:oval') {
+      element.businessObject.name = text;
+
+      // make label visible immediately
+      eventBus.fire('element.changed', { element: element });
+    }
+  };
+
+  // Doppelklick-Event für Ovale registrieren
+  eventBus.on('element.dblclick', function(event) {
+    var element = event.element;
+
+    if (element.type === 'ocbpmn:oval') {
+      directEditing.activate(element);
+    }
+  });
+
+}
+
+OcbpmnDirectEditingProvider.$inject = [ 'directEditing', 'eventBus' ];
+
+export default {
+  __init__: [ 'ocbpmnDirectEditingProvider' ],
+  ocbpmnDirectEditingProvider: [ 'type', OcbpmnDirectEditingProvider ]
+};

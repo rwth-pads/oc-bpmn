@@ -45,6 +45,11 @@ export default function ocbpmnElementFactory(bpmnFactory, moddle) {
             id: attrs.id
           });
         }
+
+        // add label name if not set
+        if (!attrs.businessObject.name) {
+          attrs.businessObject.name = '';
+        }
       }
 
       // add width and height if shape
@@ -130,9 +135,9 @@ ocbpmnElementFactory.prototype._getocbpmnElementSize = function(type) {
     __default: { width: 100, height: 80 },
     'ocbpmn:triangle': { width: 40, height: 40 },
     'ocbpmn:circle': { width: 140, height: 140 },
-    'ocbpmn:hexagon': { width: 26*1.5, height: 30*1.5 },
+    'ocbpmn:hexagon': { width: 26 * 1.5, height: 30 * 1.5 },
     'ocbpmn:join': { width: 34, height: 42 },
-    'ocbpmn:oval': { width: 60, height: 30 }
+    'ocbpmn:oval': { width: 80, height: 40 }
   };
 
   return shapes[type] || shapes.__default;

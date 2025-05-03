@@ -21,12 +21,23 @@ import {
 } from "bpmn-js/lib/draw/BpmnRenderUtil";
 import {query as domQuery} from "min-dom";
 
-
 var COLOR_GREEN  = '#52B415',
     COLOR_RED    = '#cc0000',
     COLOR_YELLOW = '#ffc800';
 
-
+function renderOcLabel(parentGfx, label, options = {}) {
+    const text = svgCreate('text');
+    svgAttr(text, {
+        x: options.x || 0,
+        y: options.y || 0,
+        fill: options.fill || 'black',
+        'text-anchor': options.align || 'middle',
+        'dominant-baseline': 'central'
+    });
+    text.textContent = label;
+    svgAppend(parentGfx, text);
+    return text;
+}
 /**
  * A renderer that knows how to render ocbpmn elements.
  */
@@ -254,12 +265,12 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
                 ry: height / 2
             });
 
-            // Apply the style attributes
+            // Apply the style attributes and append the ellipse to the parent element
             svgAttr(ellipse, attrs);
-
-            // Append the ellipse to the parent element
             svgAppend(p, ellipse);
 
+            // add text box
+            renderOcLabel(p, element.businessObject.name || '', {x: cx, y: cy, fill: 'black', align: 'middle'});
             return ellipse;
 
         /* old ellipse without element in function args ...
@@ -298,6 +309,7 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             };
 
         */
+
 
         this.drawTriangle = function (p, side) {
             var halfSide = side / 2,
