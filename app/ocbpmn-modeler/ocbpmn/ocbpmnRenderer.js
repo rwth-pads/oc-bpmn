@@ -500,13 +500,20 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
             }; */
 
-        this.drawocbpmnConnection = function (p, element, color = {fill: '#000000', stroke: '#000000'}) {
+        this.drawocbpmnConnection = function (p, element) {
+            // neu: source color finden
+            const sourceElement = element.source?.businessObject;
+            const color = {
+                fill: sourceElement?.customColors?.fill || '#000000',
+                stroke: sourceElement?.customColors?.stroke || '#000000'
+            };
+
             // style for line
             var attrs = computeStyle(attrs, {
                 id: 'ofCon-path',
                 //fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
-                //stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
-                stroke: element.businessObject?.customColors?.stroke || color.stroke,
+                stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
+                //stroke: element.businessObject?.customColors?.stroke || color.stroke,
                 strokeWidth: 2,
                 strokeLinecap: 'round',
                 strokeDasharray: '0, 5',

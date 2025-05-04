@@ -1,60 +1,71 @@
 export default function ChangeColor(modeler) {
-    var modeling = modeler.get('modeling');
-    var elementRegistry = modeler.get('elementRegistry');
-    var canvas = modeler.get('canvas'); // Access the canvas
+  var modeling = modeler.get('modeling');
+  var elementRegistry = modeler.get('elementRegistry');
+  var canvas = modeler.get('canvas'); // Access the canvas
 
-    // Backup the original setColor function
-    var originalSetColor = modeling.setColor;
+  // Backup the original setColor function
+  var originalSetColor = modeling.setColor;
 
-    // Override the setColor function
-    modeling.setColor = function(elements, colors) {
-        elements = Array.isArray(elements) ? elements : [elements];
+  // Override the setColor function
+  modeling.setColor = function(elements, colors) {
+    elements = Array.isArray(elements) ? elements : [ elements ];
 
-        elements.forEach(element => {
+    elements.forEach(element => {
 
-            if (element.type === 'ocbpmn:oval'){
-                element.businessObject.customColors = colors;
-                var oval = elementRegistry.getGraphics(element);
-                var svgOval = oval.querySelector('ellipse');
-                if (svgOval) {
-                    svgOval.style.fill = colors.fill;
-                    svgOval.style.stroke = colors.stroke;
-                    svgOval.setAttribute('fill', colors.fill); // wenn nur setAttribute dann wird die customfarbe erst nach bewegen des elementes veraendert???
-                    svgOval.setAttribute('stroke', colors.stroke);
-                }
-            }
-            else if (element.type === 'ocbpmn:connection'){
-                element.businessObject.customColors = colors;
-                var ocCon = elementRegistry.getGraphics(element);
-                var svgOcConLine = ocCon.querySelector("#ofCon-path");
+      if (element.type === 'ocbpmn:oval') {
+        element.businessObject.customColors = colors;
+        var oval = elementRegistry.getGraphics(element);
+        var svgOval = oval.querySelector('ellipse');
+        if (svgOval) {
+          svgOval.style.fill = colors.fill;
+          svgOval.style.stroke = colors.stroke;
+          svgOval.setAttribute('fill', colors.fill); // wenn nur setAttribute dann wird die customfarbe erst nach bewegen des elementes veraendert???
+          svgOval.setAttribute('stroke', colors.stroke);
+        }
+      }
+      else if (element.type === 'ocbpmn:connection') {
+        // automatically set connection color to source color if custom
+        const sourceElement = element.source?.businessObject;
+        if (!element.businessObject.customColors && sourceElement?.customColors) {
+          element.businessObject.customColors = {
+            fill: sourceElement.customColors.fill,
+            stroke: sourceElement.customColors.stroke
+          };
+        }
+        //element.businessObject.customColors = colors;
+        var ocCon = elementRegistry.getGraphics(element);
+        var svgOcConLine = ocCon.querySelector('#ofCon-path');
 
-                if (svgOcConLine) {
-                    //svgOcConLine.setAttribute('fill', colors.fill);
-                    //svgOcConLine.style.fill = colors.fill;
-                    //svgOcConLine.setAttribute('stroke', colors.stroke);
-                    svgOcConLine.style.stroke = colors.stroke;
-                }
+        if (svgOcConLine) {
 
+          // svgOcConLine.setAttribute('fill', colors.fill);
+          // svgOcConLine.style.fill = colors.fill;
+          // svgOcConLine.setAttribute('stroke', colors.stroke);
+          svgOcConLine.style.stroke = colors.stroke;
+          svgOcConLine.setAttribute('stroke', colors.stroke);
+        }
+        // save manually set custom color
+        element.businessObject.customColors = colors;
 
-            }
-            else if (element.type === 'ocbpmn:hexagon'){
-                const gfx = elementRegistry.getGraphics(element);
-                const svgPath = gfx.querySelector('.fill-path');
-                const svgStrokePath = gfx.querySelector('.stroke-path');
+      }
+      else if (element.type === 'ocbpmn:hexagon') {
+        const gfx = elementRegistry.getGraphics(element);
+        const svgPath = gfx.querySelector('.fill-path');
+        const svgStrokePath = gfx.querySelector('.stroke-path');
 
-                if (svgPath) {
-                    svgPath.setAttribute('fill', colors.fill);
-                }
-                if (svgStrokePath) {
-                    svgStrokePath.setAttribute('stroke', colors.stroke);
-                }
+        if (svgPath) {
+          svgPath.setAttribute('fill', colors.fill);
+        }
+        if (svgStrokePath) {
+          svgStrokePath.setAttribute('stroke', colors.stroke);
+        }
 
-            }
-            else {
-                originalSetColor.call(this, [element], colors);
-            }
+      }
+      else {
+        originalSetColor.call(this, [ element ], colors);
+      }
 
-        /*
+      /*
         if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:hexagon') {
             this._commandStack.execute('element.setColor')
             {
@@ -99,7 +110,7 @@ export default function ChangeColor(modeler) {
 
 */
 
-/*
+      /*
         elements.forEach(element => {
          //  if (element.type === 'ocbpmn:hexagon' || element.type === 'ocbpmn:connection' || element.type === 'ocbpmn:oval') {
            if (element.type === 'ocbpmn:hexagon' ) {
@@ -127,7 +138,7 @@ export default function ChangeColor(modeler) {
         }); */
 
 
-        /*
+      /*
         elements.forEach(element => {
             //  if (element.type === 'ocbpmn:hexagon' || element.type === 'ocbpmn:connection' || element.type === 'ocbpmn:oval') {
             if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:hexagon' || element.type === 'ocbpmn:connection') {
@@ -148,8 +159,7 @@ export default function ChangeColor(modeler) {
                     //}
                 }
                 if (element.type === 'ocbpmn:connection'){
-// TODO change color ehhhh
-                    debugger
+
 
                    // var ofCon = elementRegistry.getGraphics(element);
                     //var svgMarker = ofCon.querySelector('marker').querySelector('path');
@@ -193,7 +203,7 @@ export default function ChangeColor(modeler) {
 
          */
 
-        });
+    });
 
-    };
+  };
 }
