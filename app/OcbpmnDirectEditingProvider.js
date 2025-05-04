@@ -4,13 +4,36 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus) {
   // activate text field for Ovals
   this.activate = function(element) {
     if (element.type === 'ocbpmn:oval') {
+      var bounds = {
+        x: element.x + (element.width / 4), // textbox position
+        y: element.y + (element.height / 4), // textbox position
+        width: element.width / 2,
+        height: 20 // Höhe des Textfelds
+      };
+
+      setTimeout(() => {
+        var directEditingParent = document.querySelector('.djs-direct-editing-parent');
+
+        if (directEditingParent) {
+          const ovalElement = document.querySelector(`[data-element-id="${element.id}"]`);
+          const ovalRect = ovalElement.getBoundingClientRect();
+          const diagramRect = document.querySelector('.djs-container').getBoundingClientRect();
+
+          const centerX = ovalRect.left + (ovalRect.width / 2) - diagramRect.left;
+          const centerY = ovalRect.top + (ovalRect.height / 2) - diagramRect.top;
+
+          directEditingParent.style.position = 'absolute';
+          directEditingParent.style.width = bounds.width + 'px';
+          directEditingParent.style.height = bounds.height + 'px';
+          directEditingParent.style.left = centerX + 'px';
+          directEditingParent.style.top = centerY + 'px';
+          directEditingParent.style.transform = 'translate(-50%, -50%)'; // center the textbox
+          directEditingParent.style.background = 'transparent';
+        }
+      }, 0);
+
       return {
-        bounds: {
-          x: element.x + element.width / 4, // Zentriert im Oval
-          y: element.y + element.height / 4,
-          width: element.width / 2,
-          height: 30 // Höhe des Textfelds
-        },
+        bounds,
         text: element.businessObject.name || ''
       };
     }

@@ -32,7 +32,9 @@ function renderOcLabel(parentGfx, label, options = {}) {
         y: options.y || 0,
         fill: options.fill || 'black',
         'text-anchor': options.align || 'middle',
-        'dominant-baseline': 'central'
+        'dominant-baseline': 'central',
+        'font-size': options.fontSize || '12px',
+        'font-family': options.fontFamily || 'Arial, sans-serif'
     });
     text.textContent = label;
     svgAppend(parentGfx, text);
@@ -499,7 +501,6 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             }; */
 
         this.drawocbpmnConnection = function (p, element, color = {fill: '#000000', stroke: '#000000'}) {
-
             // style for line
             var attrs = computeStyle(attrs, {
                 id: 'ofCon-path',
