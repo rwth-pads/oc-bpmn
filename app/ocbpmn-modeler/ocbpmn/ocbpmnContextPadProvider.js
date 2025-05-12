@@ -11,8 +11,8 @@ import {
   bind
 } from 'min-dash';
 
-//my edit....
-//import ColorPicker from 'bpmn-js-color-picker';
+// my edit....
+// import ColorPicker from 'bpmn-js-color-picker';
 /*
 export default function ocbpmnContextPadProvider(contextPad, popupMenu, canvas, injector, connect, translate) {
 
@@ -66,7 +66,7 @@ ocbpmnContextPadProvider.$inject = [
     'translate'
 ];
 */
-//original ocbpmn
+// original ocbpmn
 
 export default function ocbpmnContextPadProvider(injector, connect, translate) {
 
@@ -83,7 +83,11 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
       connect.start(event, element, autoActivate);
     }
 
-    //TODO change this for intermediate OF arcs ?
+    function startObjectConnect(event, element, autoActivate) {
+      connect.start(event, element, autoActivate);
+    }
+
+    // old connection
     if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'ocbpmn:oval' ])) {
       assign(actions, {
         'connect': {
@@ -93,6 +97,20 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
           action: {
             click: startConnect,
             dragstart: startConnect
+          }
+        }
+      });
+    }
+    // new connection
+    if (isAny(businessObject, [ 'bpmn:Task', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'ocbpmn:oval' ])) {
+      assign(actions, {
+        'object-connect': {
+          group: 'connect',
+          className: 'ocbpmn-icon-connection',
+          title: translate('Connect using  second ocbpmn connection'),
+          action: {
+            click: startObjectConnect,
+            dragstart: startObjectConnect
           }
         }
       });
