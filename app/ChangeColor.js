@@ -2,6 +2,7 @@ export default function ChangeColor(modeler) {
   var modeling = modeler.get('modeling');
   var elementRegistry = modeler.get('elementRegistry');
   var canvas = modeler.get('canvas'); // Access the canvas
+  var eventBus = modeler.get('eventBus');
 
   // Backup the original setColor function
   var originalSetColor = modeling.setColor;
@@ -11,7 +12,7 @@ export default function ChangeColor(modeler) {
     elements = Array.isArray(elements) ? elements : [ elements ];
 
     elements.forEach(element => {
-
+      // color oval
       if (element.type === 'ocbpmn:oval') {
         element.businessObject.customColors = colors;
         var oval = elementRegistry.getGraphics(element);
@@ -23,21 +24,21 @@ export default function ChangeColor(modeler) {
           svgOval.setAttribute('stroke', colors.stroke);
         }
       }
+      // color oc connection
       else if (element.type === 'ocbpmn:connection') {
         // automatically set connection color to source color if custom
-        const sourceElement = element.source?.businessObject;
-        if (!element.businessObject.customColors && sourceElement?.customColors) {
+        // const sourceElement = element.source?.businessObject;
+        const sourceElement = element.source && element.source.businessObject;
+        //if (!element.businessObject.customColors && sourceElement?.customColors) {
+        if (!element.businessObject.customColors && sourceElement && sourceElement.customColors) {
           element.businessObject.customColors = {
             fill: sourceElement.customColors.fill,
             stroke: sourceElement.customColors.stroke
           };
         }
-        //element.businessObject.customColors = colors;
         var ocCon = elementRegistry.getGraphics(element);
         var svgOcConLine = ocCon.querySelector('#ofCon-path');
-
         if (svgOcConLine) {
-
           // svgOcConLine.setAttribute('fill', colors.fill);
           // svgOcConLine.style.fill = colors.fill;
           // svgOcConLine.setAttribute('stroke', colors.stroke);
@@ -48,6 +49,7 @@ export default function ChangeColor(modeler) {
         element.businessObject.customColors = colors;
 
       }
+      // color hexagon
       else if (element.type === 'ocbpmn:hexagon') {
         const gfx = elementRegistry.getGraphics(element);
         const svgPath = gfx.querySelector('.fill-path');
@@ -64,7 +66,8 @@ export default function ChangeColor(modeler) {
       else {
         originalSetColor.call(this, [ element ], colors);
       }
-
+      // trigger a redraw/update of the element
+      eventBus.fire('element.changed', { element: element });
       /*
         if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:hexagon') {
             this._commandStack.execute('element.setColor')
@@ -204,6 +207,40 @@ export default function ChangeColor(modeler) {
          */
 
     });
-
   };
+  // watch source color
+  eventBus.on('element.changed', function(event) {
+    var element = event.element;
+    console.log('Element:', element); // Debugging: Zeigt die gesamte Struktur des Elements
+    console.log('Outgoing:', element.outgoing); // Debugging: Zeigt die ausgehenden Verbindungen
+    if (element.type === 'ocbpmn:oval') {
+      //const outgoingCon = element.outgoing || [];
+      // Sicherstellen, dass outgoing ein Array ist und Verbindungen enthält
+      const outgoingCon = Array.isArray(element.outgoing) ? element.outgoing : [];
+      const sourceColors = element.businessObject.customColors;
+
+      if (!Array.isArray(outgoingCon) || outgoingCon.length === 0) {
+        console.warn('Keine ausgehenden Verbindungen gefunden für:', element);
+        return;
+      }
+
+      outgoingCon.forEach(connection => {
+        console.log('Connection:', connection);
+        if (connection.type === 'ocbpmn:connection' && sourceColors) {
+          connection.businessObject.customColors =
+            {
+                fill: sourceColors.fill,
+                stroke: sourceColors.stroke
+            };
+
+          const conGraphics = elementRegistry.getGraphics(connection);
+          const conLine = conGraphics.querySelector('#ofCon-path');
+          if (conLine){
+            conLine.style.stroke = sourceColors.stroke;
+            conLine.setAttribute('stroke', sourceColors.stroke);
+          }
+        }
+      });
+    }
+  });
 }
