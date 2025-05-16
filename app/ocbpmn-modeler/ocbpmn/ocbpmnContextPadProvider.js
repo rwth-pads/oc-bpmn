@@ -84,16 +84,16 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
     }
 
     function startObjectConnect(event, element, autoActivate) {
-      connect.start(event, element, autoActivate);
+      connect.start(event, element, autoActivate, { type: 'ocbpmn:connection' });
     }
 
-    // old connection
-    if (isAny(businessObject, [ 'ocbpmn:triangle', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'ocbpmn:oval' ])) {
+    // Add regular BPMN connections for BPMN elements
+    if (isAny(businessObject, [ 'bpmn:Task', 'bpmn:Event' ])) {
       assign(actions, {
         'connect': {
           group: 'connect',
           className: 'bpmn-icon-connection-multi',
-          title: translate('Connect using ocbpmn connection'),
+          title: translate('Connect using BPMN connection'),
           action: {
             click: startConnect,
             dragstart: startConnect
@@ -101,13 +101,14 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
         }
       });
     }
-    // new connection
+
+    // Add ocbpmn connections for both BPMN and ocbpmn elements
     if (isAny(businessObject, [ 'bpmn:Task', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'ocbpmn:oval' ])) {
       assign(actions, {
         'object-connect': {
           group: 'connect',
           className: 'ocbpmn-icon-connection',
-          title: translate('Connect using  second ocbpmn connection'),
+          title: translate('Connect using ocbpmn connection'),
           action: {
             click: startObjectConnect,
             dragstart: startObjectConnect

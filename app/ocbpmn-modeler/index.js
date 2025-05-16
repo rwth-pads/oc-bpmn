@@ -53,6 +53,14 @@ ocbpmnModeler.prototype._addocbpmnConnection = function(ocbpmnElement) {
       elementFactory = this.get('elementFactory'),
       elementRegistry = this.get('elementRegistry');
 
+  var sourceElement = elementRegistry.get(ocbpmnElement.source),
+      targetElement = elementRegistry.get(ocbpmnElement.target);
+
+  if (!sourceElement || !targetElement) {
+    console.error('Source or target element not found:', ocbpmnElement);
+    return;
+  }
+
   var ocbpmnAttrs = assign({ businessObject: ocbpmnElement }, ocbpmnElement);
 
   var connection = elementFactory.create('connection', assign(ocbpmnAttrs, {

@@ -78,6 +78,12 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs) {
       });
     }
 
+    if (source.businessObject && source.businessObject.customColors) {
+        assign(businessObject, {
+            customColors: source.businessObject.customColors
+        });
+    }
+
   }
 
   this.executed([

@@ -502,10 +502,9 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
         this.drawocbpmnConnection = function (p, element) {
             // neu: source color finden
-            const sourceElement = element.source?.businessObject;
             const color = {
-                fill: sourceElement?.customColors?.fill || '#000000',
-                stroke: sourceElement?.customColors?.stroke || '#000000'
+                fill: element.businessObject?.customColors?.fill || '#000000',
+                stroke: element.businessObject?.customColors?.stroke || '#000000'
             };
 
             // style for line

@@ -45,61 +45,37 @@ ocbpmnRules.prototype.init = function() {
     return is(target, 'bpmn:Process') || is(target, 'bpmn:Participant') || is(target, 'bpmn:Collaboration');
   }
 
-/**
+  /**
  * Can source and target be connected?
  */
-function canConnect(source, target) {
+function canConnect(source, target, connection) {
+  // If a connection type is explicitly provided (from context pad), use that
+  // if (connection && connection.type) {
+   // return { type: connection.type };
+  // }
 
-  // only judge about ocbpmn elements
-  if (!isocbpmn(source) && !isocbpmn(target)) {
-    return;
-  }
-
-  // allow custom connection from 'ocbpmn:hexagon' or 'bpmn:Activity' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
-if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
-  if (target.type === 'ocbpmn:oval' || target.type.startsWith('bpmn:') && target.type.endsWith('Event') || target.type === 'bpmn:Task') {
-    return { type: 'ocbpmn:connection' };
-  } else {
-    return false;
-  }
-}
-/*
-// "obj node" oval can connect to activities and other obj nodes
-if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
-    if (target.type === 'ocbpmn:oval' || target.type === 'bpmn:Task'){
-        return { type: 'ocbpmn:connection' };
-    } else {
-        return false;
+    // connection type provided by context pad
+    if (connection && connection.type) {
+      return { type: connection.type };
     }
-}
 
-    if (source.type === 'ocbpmn:oval' || target.type === 'ocbpmn:oval') {
+    // For ocbpmn:connection icon in context pad
+    if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
+      if (target.type === 'ocbpmn:oval' || target.type.startsWith('bpmn:') && target.type.endsWith('Event') || target.type === 'bpmn:Task') {
+        return { type: 'ocbpmn:connection' };
+      }
+    }
 
-            return { type: 'ocbpmn:connection' };
-        } else {
-            return false;
-        }
-*/
-// TODO probably need to add an OF symbol to pop up window to differentiate OF from CF
-//  and allow intermediate OF task to task con
-//if (source.type === 'bpmn:Task'){}
-
-  // allow connection from 'ocbpmn:hexagon' to 'ocbpmn:join' (and 'bpmn:event' for test purposes)
-  //if (source.type === 'ocbpmn:hexagon') {
-    //if (target.type === 'ocbpmn:join' || target.type.startsWith('bpmn:') && target.type.endsWith('Event')) {
-      //return { type: 'bpmn:SequenceFlow' };
-    //} else {
-     //return false;
-    //}
-  //}
+    // For regular BPMN connections, let BPMN rules handle it
+    if (!isocbpmn(source) && !isocbpmn(target)) {
+      return;
+    }
 
   // allow connection from 'ocbpmn:join' to 'bpmn:Task', 'ocbpmn:hexagon', or 'bpmn:Event'
   if (source.type === 'ocbpmn:join') {
     if (target.type === 'bpmn:Task' || target.type === 'ocbpmn:hexagon' || target.type.startsWith('bpmn:')
         && target.type.endsWith('Event')) {
      return { type: 'bpmn:SequenceFlow' };
-    } else {
-     return false;
     }
   }
 
@@ -107,8 +83,6 @@ if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
   if (source.type.startsWith('bpmn:') && source.type.endsWith('Event')) {
     if (target.type === 'ocbpmn:join') {
       return { type: 'bpmn:SequenceFlow' };
-    } else {
-      return false;
     }
   }
 
@@ -139,19 +113,19 @@ if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
     return canCreate(shape, target);
   });
 
-  //this.addRule('shape.resize', HIGH_PRIORITY, function(context) {
-    //var shape = context.shape;
+  // this.addRule('shape.resize', HIGH_PRIORITY, function(context) {
+  // var shape = context.shape;
 
-    //if (isocbpmn(shape)) {
-      // Allow resize if the shape is a 'hexagon'
-      //if (shape.type === 'ocbpmn:hexagon') {
-       //   return true;
-      //}
+  // if (isocbpmn(shape)) {
+  // Allow resize if the shape is a 'hexagon'
+  // if (shape.type === 'ocbpmn:hexagon') {
+  //   return true;
+  // }
 
-      // Cannot resize other ocbpmn elements
-     // return false;
- // }
-  //});
+  // Cannot resize other ocbpmn elements
+  // return false;
+  // }
+  // });
 
   this.addRule('connection.create', HIGH_PRIORITY, function(context) {
     var source = context.source,
