@@ -5,6 +5,7 @@ import ocbpmnPalette from './ocbpmnPalette';
 import ocbpmnRenderer from './ocbpmnRenderer';
 import ocbpmnRules from './ocbpmnRules';
 import ocbpmnUpdater from './ocbpmnUpdater';
+import OcbpmnConnectionIntent from './ocbpmnConnectionIntent';
 
 export default {
   __init__: [
@@ -13,7 +14,8 @@ export default {
     'ocbpmnRenderer',
     'ocbpmnRules',
     'ocbpmnUpdater',
-    'paletteProvider'
+    'paletteProvider',
+    'ocbpmnConnectionIntent'
   ],
   contextPadProvider: [ 'type', ocbpmnContextPadProvider ],
   ocbpmnOrderingProvider: [ 'type', ocbpmnOrderingProvider ],
@@ -21,5 +23,6 @@ export default {
   ocbpmnRules: [ 'type', ocbpmnRules ],
   ocbpmnUpdater: [ 'type', ocbpmnUpdater ],
   elementFactory: [ 'type', ocbpmnElementFactory ],
-  paletteProvider: [ 'type', ocbpmnPalette ]
+  paletteProvider: [ 'type', ocbpmnPalette ],
+  ocbpmnConnectionIntent: [ 'type', OcbpmnConnectionIntent ]
 };

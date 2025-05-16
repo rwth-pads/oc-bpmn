@@ -20,96 +20,116 @@ function isocbpmn(element) {
 /**
  * Specific rules for ocbpmn elements
  */
-export default function ocbpmnRules(eventBus) {
+export default function ocbpmnRules(eventBus, ocbpmnConnectionIntent, commandStack) {
   RuleProvider.call(this, eventBus);
+  this._ocbpmnConnectionIntent = ocbpmnConnectionIntent;
+  this._eventBus = eventBus;
 }
 
 inherits(ocbpmnRules, RuleProvider);
 
-ocbpmnRules.$inject = [ 'eventBus' ];
+ocbpmnRules.$inject = [ 'eventBus', 'ocbpmnConnectionIntent', 'commandStack' ];
 
 
 ocbpmnRules.prototype.init = function() {
+  var self = this;
+
+  this._eventBus.on('commandStack.connection.create.postExecuted', function(event) {
+    console.log('OCBPMN RULES: commandStack.connection.create.postExecuted - Clearing Intent');
+    self._ocbpmnConnectionIntent.clearIntent();
+  });
+  
+  this._eventBus.on('connect.cancel', function(event) {
+    console.log('OCBPMN RULES: connect.cancel - Clearing Intent');
+    self._ocbpmnConnectionIntent.clearIntent();
+  });
+  this._eventBus.on('connect.cleanup', function(event) {
+    console.log('OCBPMN RULES: connect.cleanup - Clearing Intent if not already cleared by postExecute');
+    if (self._ocbpmnConnectionIntent.getIntent()) {
+        // Decided to comment this out to rely primarily on postExecuted and cancel.
+        // Clearing too aggressively might lead to the original problem.
+    }
+  });
 
   /**
    * Can shape be created on target container?
    */
   function canCreate(shape, target) {
-
-    // only judge about ocbpmn elements
     if (!isocbpmn(shape)) {
       return;
     }
-
-    // allow creation on processes
     return is(target, 'bpmn:Process') || is(target, 'bpmn:Participant') || is(target, 'bpmn:Collaboration');
   }
 
   /**
- * Can source and target be connected?
- */
-function canConnect(source, target, connection) {
-  // If a connection type is explicitly provided (from context pad), use that
-  // if (connection && connection.type) {
-   // return { type: connection.type };
-  // }
+   * Shared connection logic.
+   * @param {djs.model.Shape} source
+   * @param {djs.model.Shape} target
+   * @param {Object} [hintsOrConnection] - For 'connection.create', this is `context.hints`.
+   *                                     For 'connection.reconnect', this is the `connection` object.
+   * @param {string} [eventType] - 'create' or 'reconnect' to differentiate context of hintsOrConnection.
+   */
+  function baseCanConnect(source, target, connectionOrContext, eventType) {
+    var intent = null;
+    if (eventType === 'create') {
+      intent = self._ocbpmnConnectionIntent.getIntent();
+      
+      console.log('OCBPMN RULES: Create Event - baseCanConnect');
+      console.log('  Intent from Service:', intent);
+      console.log('  Source Type:', source.type);
+      console.log('  Target Type:', target.type);
 
-    // connection type provided by context pad
-    if (connection && connection.type) {
-      return { type: connection.type };
-    }
-
-    // For ocbpmn:connection icon in context pad
-    if (source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task') {
-      if (target.type === 'ocbpmn:oval' || target.type.startsWith('bpmn:') && target.type.endsWith('Event') || target.type === 'bpmn:Task') {
-        return { type: 'ocbpmn:connection' };
+      if (intent === 'ocbpmn:connection') {
+        console.log('  Attempting OCBPMN Connection Create via Service Intent');
+        if ((source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
+            (target.type === 'ocbpmn:oval' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
+          return { type: 'ocbpmn:connection' };
+        }
+        return false;
       }
-    }
+      if (!isocbpmn(source) && !isocbpmn(target)) {
+        return undefined;
+      }
+      if (isocbpmn(source) || isocbpmn(target)) {
+        return false;
+      }
+      return false;
 
-    // For regular BPMN connections, let BPMN rules handle it
-    if (!isocbpmn(source) && !isocbpmn(target)) {
-      return;
+    } else if (eventType === 'reconnect') {
+      const connection = connectionOrContext;
+      if (connection.type === 'ocbpmn:connection') {
+        if ((source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
+            (target.type === 'ocbpmn:oval' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
+          return { type: 'ocbpmn:connection' };
+        }
+        return false;
+      }
+      if (!isocbpmn(source) && !isocbpmn(target)) {
+         return undefined;
+      }
+      if (isocbpmn(source) || isocbpmn(target)) {
+        return false;
+      }
+      return false;
     }
-
-  // allow connection from 'ocbpmn:join' to 'bpmn:Task', 'ocbpmn:hexagon', or 'bpmn:Event'
-  if (source.type === 'ocbpmn:join') {
-    if (target.type === 'bpmn:Task' || target.type === 'ocbpmn:hexagon' || target.type.startsWith('bpmn:')
-        && target.type.endsWith('Event')) {
-     return { type: 'bpmn:SequenceFlow' };
-    }
+    return false;
   }
-
-  // allow connection from 'bpmn:Event' to 'ocbpmn:join'
-  if (source.type.startsWith('bpmn:') && source.type.endsWith('Event')) {
-    if (target.type === 'ocbpmn:join') {
-      return { type: 'bpmn:SequenceFlow' };
-    }
-  }
-
-  // disallow all other connections
-  return false;
-}
 
   this.addRule('elements.move', HIGH_PRIORITY, function(context) {
     var target = context.target,
         shapes = context.shapes;
-
     var allowed = reduce(shapes, function(result, s) {
-      // allow moving custom shapes
       if (isocbpmn(s)) {
         return true;
       }
-
       return canCreate(s, target);
     }, undefined);
-
     return allowed;
   });
 
   this.addRule('shape.create', HIGH_PRIORITY, function(context) {
     var target = context.target,
         shape = context.shape;
-
     return canCreate(shape, target);
   });
 
@@ -130,26 +150,21 @@ function canConnect(source, target, connection) {
   this.addRule('connection.create', HIGH_PRIORITY, function(context) {
     var source = context.source,
         target = context.target;
-
-    return canConnect(source, target);
+    return baseCanConnect(source, target, context, 'create');
   });
-
-
 
   this.addRule('connection.reconnectStart', HIGH_PRIORITY, function(context) {
     var connection = context.connection,
         source = context.hover || context.source,
         target = connection.target;
-
-    return canConnect(source, target, connection);
+    return baseCanConnect(source, target, connection, 'reconnect');
   });
 
   this.addRule('connection.reconnectEnd', HIGH_PRIORITY, function(context) {
     var connection = context.connection,
         source = connection.source,
         target = context.hover || context.target;
-
-    return canConnect(source, target, connection);
+    return baseCanConnect(source, target, connection, 'reconnect');
   });
 
 };

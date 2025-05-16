@@ -68,7 +68,8 @@ ocbpmnContextPadProvider.$inject = [
 */
 // original ocbpmn
 
-export default function ocbpmnContextPadProvider(injector, connect, translate) {
+export default function ocbpmnContextPadProvider(injector, connect, translate, ocbpmnConnectionIntent) {
+  console.log('OCBPMN CONTEXT PAD: Initialized with ocbpmnConnectionIntent:', ocbpmnConnectionIntent);
 
   injector.invoke(ContextPadProvider, this);
 
@@ -76,19 +77,24 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
 
   this.getContextPadEntries = function(element) {
     var actions = cached(element);
-
     var businessObject = element.businessObject;
 
     function startConnect(event, element, autoActivate) {
+      console.log('OCBPMN CONTEXT PAD: startConnect (BPMN) called');
+      ocbpmnConnectionIntent.setIntent('bpmn:SequenceFlow'); 
+      console.log('OCBPMN CONTEXT PAD: Intent set to bpmn:SequenceFlow');
       connect.start(event, element, autoActivate);
     }
 
     function startObjectConnect(event, element, autoActivate) {
-      connect.start(event, element, autoActivate, { type: 'ocbpmn:connection' });
+      console.log('OCBPMN CONTEXT PAD: startObjectConnect (OCBPMN) called');
+      ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
+      console.log('OCBPMN CONTEXT PAD: Intent set to ocbpmn:connection');
+      connect.start(event, element, autoActivate);
     }
 
     // Add regular BPMN connections for BPMN elements
-    if (isAny(businessObject, [ 'bpmn:Task', 'bpmn:Event' ])) {
+    if (isAny(businessObject, [ 'bpmn:Task', 'bpmn:Event', 'bpmn:Gateway' ])) {
       assign(actions, {
         'connect': {
           group: 'connect',
@@ -102,13 +108,13 @@ export default function ocbpmnContextPadProvider(injector, connect, translate) {
       });
     }
 
-    // Add ocbpmn connections for both BPMN and ocbpmn elements
-    if (isAny(businessObject, [ 'bpmn:Task', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'ocbpmn:oval' ])) {
+    // Add ocbpmn connections for specified elements
+    if (isAny(businessObject, [ 'ocbpmn:oval', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'bpmn:Task', 'bpmn:Gateway' ])) {
       assign(actions, {
         'object-connect': {
           group: 'connect',
           className: 'ocbpmn-icon-connection',
-          title: translate('Connect using ocbpmn connection'),
+          title: translate('Connect using OCBPMN connection'),
           action: {
             click: startObjectConnect,
             dragstart: startObjectConnect
@@ -126,6 +132,7 @@ inherits(ocbpmnContextPadProvider, ContextPadProvider);
 ocbpmnContextPadProvider.$inject = [
   'injector',
   'connect',
-  'translate'
+  'translate',
+  'ocbpmnConnectionIntent' 
 ];
 
