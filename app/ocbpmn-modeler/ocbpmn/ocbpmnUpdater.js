@@ -19,8 +19,6 @@ import {
  */
 export default function ocbpmnUpdater(eventBus, modeling, bpmnjs) {
 
-    //TODO to update color after change etc look here i think
-
   CommandInterceptor.call(this, eventBus);
 
   function updateocbpmnElement(e) {
@@ -78,10 +76,11 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs) {
       });
     }
 
-    if (source.businessObject && source.businessObject.customColors) {
-        assign(businessObject, {
-            customColors: source.businessObject.customColors
-        });
+    // update connection color if source is ocbpmn:oval and has customColors
+    if (source && source.type === 'ocbpmn:oval' && source.businessObject.customColors) {
+      assign(businessObject, {
+        customColors: source.businessObject.customColors
+      });
     }
 
   }
