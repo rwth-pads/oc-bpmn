@@ -3,7 +3,7 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus) {
 
   // activate text field for Ovals
   this.activate = function(element) {
-    if (element.type === 'ocbpmn:oval') {
+    if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:endoval') {
       var bounds = {
         x: element.x + (element.width / 4), // textbox position
         y: element.y + (element.height / 4), // textbox position
@@ -41,7 +41,7 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus) {
 
   // update the text field for Ovals
   this.update = function(element, text) {
-    if (element.type === 'ocbpmn:oval') {
+    if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:endoval') {
       element.businessObject.name = text;
 
       // make label visible immediately
@@ -53,7 +53,7 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus) {
   eventBus.on('element.dblclick', function(event) {
     var element = event.element;
 
-    if (element.type === 'ocbpmn:oval') {
+    if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:endoval') {
       directEditing.activate(element);
     }
   });
