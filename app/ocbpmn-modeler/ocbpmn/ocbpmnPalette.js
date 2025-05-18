@@ -63,6 +63,7 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
     create.start(event, elementFactory.createParticipantShape(collapsed));
   }
 
+  // add icons to palette and make them functional
   assign(actions, {
     'ocbpmn-hexagon': createAction(
       'ocbpmn:hexagon', 'ocbpmn', 'icon-ocbpmn-hexagon'
@@ -71,6 +72,8 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
       'ocbpmn:join', 'ocbpmn', 'icon-ocbpmn-join'
     ),
     'ocbpmn-oval': createAction('ocbpmn:oval', 'ocbpmn', 'icon-ocbpmn-oval'
+    ),
+    'ocbpmn-endoval': createAction('ocbpmn:endoval', 'ocbpmn', 'icon-ocbpmn-endoval'
     ),
     'ocbpmn-separator': {
       group: 'ocbpmn',

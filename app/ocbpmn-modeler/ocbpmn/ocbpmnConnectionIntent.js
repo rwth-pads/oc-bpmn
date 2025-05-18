@@ -21,4 +21,4 @@ export default function OcbpmnConnectionIntent() {
   };
 }
 
-OcbpmnConnectionIntent.$inject = []; 
+OcbpmnConnectionIntent.$inject = [];

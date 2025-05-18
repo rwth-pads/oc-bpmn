@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   reduce
 } from 'min-dash';
@@ -38,7 +39,7 @@ ocbpmnRules.prototype.init = function() {
     console.log('OCBPMN RULES: commandStack.connection.create.postExecuted - Clearing Intent');
     self._ocbpmnConnectionIntent.clearIntent();
   });
-  
+
   this._eventBus.on('connect.cancel', function(event) {
     console.log('OCBPMN RULES: connect.cancel - Clearing Intent');
     self._ocbpmnConnectionIntent.clearIntent();
@@ -65,7 +66,7 @@ ocbpmnRules.prototype.init = function() {
    * Shared connection logic.
    * @param {djs.model.Shape} source
    * @param {djs.model.Shape} target
-   * @param {Object} [hintsOrConnection] - For 'connection.create', this is `context.hints`.
+   * @param {Object} [connectionOrContext] - For 'connection.create', this is `context.hints`.
    *                                     For 'connection.reconnect', this is the `connection` object.
    * @param {string} [eventType] - 'create' or 'reconnect' to differentiate context of hintsOrConnection.
    */
@@ -73,7 +74,7 @@ ocbpmnRules.prototype.init = function() {
     var intent = null;
     if (eventType === 'create') {
       intent = self._ocbpmnConnectionIntent.getIntent();
-      
+
       console.log('OCBPMN RULES: Create Event - baseCanConnect');
       console.log('  Intent from Service:', intent);
       console.log('  Source Type:', source.type);
@@ -82,7 +83,7 @@ ocbpmnRules.prototype.init = function() {
       if (intent === 'ocbpmn:connection') {
         console.log('  Attempting OCBPMN Connection Create via Service Intent');
         if ((source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
-            (target.type === 'ocbpmn:oval' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
+            (target.type === 'ocbpmn:oval' || target.type === 'ocbpmn:endoval' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
           return { type: 'ocbpmn:connection' };
         }
         return false;
@@ -96,10 +97,10 @@ ocbpmnRules.prototype.init = function() {
       return false;
 
     } else if (eventType === 'reconnect') {
-      const connection = connectionOrContext;
-      if (connection.type === 'ocbpmn:connection') {
+      // const connection = connectionOrContext;
+      if (connectionOrContext.type === 'ocbpmn:connection') {
         if ((source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
-            (target.type === 'ocbpmn:oval' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
+            (target.type === 'ocbpmn:oval' || target.type === 'ocbpmn:endoval' ||  target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
           return { type: 'ocbpmn:connection' };
         }
         return false;

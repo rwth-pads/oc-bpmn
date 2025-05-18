@@ -57,6 +57,7 @@ ocbpmnModeler.prototype._addocbpmnConnection = function(ocbpmnElement) {
       targetElement = elementRegistry.get(ocbpmnElement.target);
 
   if (!sourceElement || !targetElement) {
+    // eslint-disable-next-line no-undef
     console.error('Source or target element not found:', ocbpmnElement);
     return;
   }

@@ -13,17 +13,11 @@ import {
   create as svgCreate
 } from 'tiny-svg';
 
-//me import
-import {
-    black,
-    getFillColor,
-    getStrokeColor
-} from "bpmn-js/lib/draw/BpmnRenderUtil";
-import {query as domQuery} from "min-dom";
-
 var COLOR_GREEN  = '#52B415',
     COLOR_RED    = '#cc0000',
-    COLOR_YELLOW = '#ffc800';
+    COLOR_YELLOW = '#ffc800',
+    COLOR_FILLBLUE   = '#6691FF',
+    COLOR_STROKEBLUE = '#0048FF';
 
 function renderOcLabel(parentGfx, label, options = {}) {
     const text = svgCreate('text');
@@ -243,16 +237,15 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             return p;
         };
 
-        this.drawOval = function (element, p, width, height, color = {fill: '#6691FF', stroke: '#0048FF'}) {
+        this.drawOval = function (element, p, width, height, color = {fill: COLOR_FILLBLUE, stroke: COLOR_STROKEBLUE}) {
 
              var cx = width / 2,
                  cy = height / 2;
 
-            // Define your style attributes (using your existing computeStyle function)
+            // Define style attributes depending on shape type (using existing computeStyle function)
             var attrs = computeStyle({}, {
                 stroke: element.businessObject?.customColors?.stroke || color.stroke,
-                strokeWidth: 2,
-                //fill: COLOR_YELLOW
+                strokeWidth: 2, // TODO dependent on oval type change stroke width...
                 fill: element.businessObject?.customColors?.fill || color.fill
             });
 
@@ -311,7 +304,37 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             };
 
         */
+        this.drawEndOval = function (element, p, width, height, color = {fill: COLOR_FILLBLUE, stroke: COLOR_STROKEBLUE}) {
 
+            var cx = width / 2,
+                cy = height / 2;
+
+            // Define style attributes depending on shape type (using existing computeStyle function)
+            var attrs = computeStyle({}, {
+                stroke: element.businessObject?.customColors?.stroke || color.stroke,
+                strokeWidth: 4, // TODO dependent on oval type change stroke width...
+                fill: element.businessObject?.customColors?.fill || color.fill
+            });
+
+            // Create an ellipse element
+            var ellipse = svgCreate('ellipse');
+
+            // Set the ellipse's attributes
+            svgAttr(ellipse, {
+                cx: cx,
+                cy: cy,
+                rx: width / 2,
+                ry: height / 2
+            });
+
+            // Apply the style attributes and append the ellipse to the parent element
+            svgAttr(ellipse, attrs);
+            svgAppend(p, ellipse);
+
+            // add text box
+            renderOcLabel(p, element.businessObject.name || '', {x: cx, y: cy, fill: 'black', align: 'middle'});
+            return ellipse;
+        }
 
         this.drawTriangle = function (p, side) {
             var halfSide = side / 2,
@@ -503,8 +526,8 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
         this.drawocbpmnConnection = function (p, element) {
             // neu: source color finden
             const color = {
-                fill: element.businessObject?.customColors?.fill || '#000000',
-                stroke: element.businessObject?.customColors?.stroke || '#000000'
+                fill: element.businessObject?.customColors?.fill || COLOR_STROKEBLUE,
+                stroke: element.businessObject?.customColors?.stroke || COLOR_STROKEBLUE
             };
 
             // style for line
@@ -552,8 +575,8 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
                 svgAttr(markerPath, {
                     id: 'ofMarker-path',
                     d: 'M 1 5 L 11 10 L 1 15 Z', //triangle
-                    fill: color.fill,
-                    stroke: color.stroke,
+                    fill: '#000000', //color.fill,
+                    stroke: '#000000', //color.stroke,
                     strokeWidth: 1,
 
                 });
@@ -617,6 +640,10 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
         if (type === 'ocbpmn:oval') {
             return this.drawOval(element, p, element.width, element.height);
+        }
+
+        if (type === 'ocbpmn:endoval') {
+            return this.drawEndOval(element, p, element.width, element.height);
         }
     };
 

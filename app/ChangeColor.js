@@ -13,7 +13,7 @@ export default function ChangeColor(modeler) {
 
     elements.forEach(element => {
 
-      if (element.type === 'ocbpmn:oval') {
+      if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:endoval') {
         // color oval
         element.businessObject.customColors = colors;
         var oval = elementRegistry.getGraphics(element);
