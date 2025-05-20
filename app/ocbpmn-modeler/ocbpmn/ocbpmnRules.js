@@ -82,8 +82,8 @@ ocbpmnRules.prototype.init = function() {
 
       if (intent === 'ocbpmn:connection') {
         console.log('  Attempting OCBPMN Connection Create via Service Intent');
-        if ((source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
-            (target.type === 'ocbpmn:oval' || target.type === 'ocbpmn:endoval' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
+        if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
+            (target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
           return { type: 'ocbpmn:connection' };
         }
         return false;
@@ -97,10 +97,10 @@ ocbpmnRules.prototype.init = function() {
       return false;
 
     } else if (eventType === 'reconnect') {
-      // const connection = connectionOrContext;
-      if (connectionOrContext.type === 'ocbpmn:connection') {
-        if ((source.type === 'ocbpmn:oval' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
-            (target.type === 'ocbpmn:oval' || target.type === 'ocbpmn:endoval' ||  target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
+      const connection = connectionOrContext;
+      if (connection.type === 'ocbpmn:connection') {
+        if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
+            (target.type === 'ocbpmn:startobject' || target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||  target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
           return { type: 'ocbpmn:connection' };
         }
         return false;

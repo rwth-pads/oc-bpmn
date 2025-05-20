@@ -71,9 +71,11 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
     'ocbpmn-join': createAction(
       'ocbpmn:join', 'ocbpmn', 'icon-ocbpmn-join'
     ),
-    'ocbpmn-oval': createAction('ocbpmn:oval', 'ocbpmn', 'icon-ocbpmn-oval'
+    'ocbpmn-oval': createAction('ocbpmn:startobject', 'ocbpmn', 'icon-ocbpmn-oval'
     ),
-    'ocbpmn-endoval': createAction('ocbpmn:endoval', 'ocbpmn', 'icon-ocbpmn-endoval'
+    'ocbpmn-intermediateoval': createAction('ocbpmn:intermediateobject', 'ocbpmn', 'icon-ocbpmn-intermediateoval'
+    ),
+    'ocbpmn-endoval': createAction('ocbpmn:endobject', 'ocbpmn', 'icon-ocbpmn-endoval'
     ),
     'ocbpmn-separator': {
       group: 'ocbpmn',

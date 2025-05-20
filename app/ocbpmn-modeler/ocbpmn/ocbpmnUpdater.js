@@ -77,7 +77,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs) {
     }
 
     // update connection color if source is ocbpmn:oval and has customColors
-    if (source && source.type === 'ocbpmn:oval' && source.businessObject.customColors) {
+    if (source && source.type === 'ocbpmn:startobject' && source.businessObject.customColors) {
       assign(businessObject, {
         customColors: source.businessObject.customColors
       });

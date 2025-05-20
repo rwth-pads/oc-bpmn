@@ -81,7 +81,7 @@ export default function ocbpmnContextPadProvider(injector, connect, translate, o
 
     function startConnect(event, element, autoActivate) {
       console.log('OCBPMN CONTEXT PAD: startConnect (BPMN) called');
-      ocbpmnConnectionIntent.setIntent('bpmn:SequenceFlow'); 
+      ocbpmnConnectionIntent.setIntent('bpmn:SequenceFlow');
       console.log('OCBPMN CONTEXT PAD: Intent set to bpmn:SequenceFlow');
       connect.start(event, element, autoActivate);
     }
@@ -109,7 +109,7 @@ export default function ocbpmnContextPadProvider(injector, connect, translate, o
     }
 
     // Add ocbpmn connections for specified elements
-    if (isAny(businessObject, [ 'ocbpmn:oval', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'bpmn:Task', 'bpmn:Gateway' ])) {
+    if (isAny(businessObject, [ 'ocbpmn:startobject', 'ocbpmn:intermediateobject', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'bpmn:Task', 'bpmn:Gateway' ])) {
       assign(actions, {
         'object-connect': {
           group: 'connect',
@@ -133,6 +133,6 @@ ocbpmnContextPadProvider.$inject = [
   'injector',
   'connect',
   'translate',
-  'ocbpmnConnectionIntent' 
+  'ocbpmnConnectionIntent'
 ];
 

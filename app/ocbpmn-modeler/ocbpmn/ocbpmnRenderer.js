@@ -238,14 +238,25 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
         };
 
         this.drawOval = function (element, p, width, height, color = {fill: COLOR_FILLBLUE, stroke: COLOR_STROKEBLUE}) {
+            let strokeWidth = 2, doubleLine = false;
+            var cx = width / 2,
+                cy = height / 2;
 
-             var cx = width / 2,
-                 cy = height / 2;
+            if (element.type === 'ocbpmn:startobject') {
+                strokeWidth = 2;
+                doubleLine = false;
+            } else if (element.type === 'ocbpmn:intermediateobject') {
+                strokeWidth = 2;
+                doubleLine = true;
+            } else if (element.type === 'ocbpmn:endobject') {
+                strokeWidth = 4;
+                doubleLine = false;
+            }
 
             // Define style attributes depending on shape type (using existing computeStyle function)
             var attrs = computeStyle({}, {
                 stroke: element.businessObject?.customColors?.stroke || color.stroke,
-                strokeWidth: 2, // TODO dependent on oval type change stroke width...
+                strokeWidth: strokeWidth,
                 fill: element.businessObject?.customColors?.fill || color.fill
             });
 
@@ -263,6 +274,21 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             // Apply the style attributes and append the ellipse to the parent element
             svgAttr(ellipse, attrs);
             svgAppend(p, ellipse);
+
+            // Double line for intermediate
+            if (doubleLine) {
+                var innerEllipse = svgCreate('ellipse');
+                svgAttr(innerEllipse, {
+                    cx: cx,
+                    cy: cy,
+                    rx: width / 2 - 4,
+                    ry: height / 2 - 4,
+                    stroke: attrs.stroke,
+                    strokeWidth: 2,
+                    fill: 'none'
+                });
+                svgAppend(p, innerEllipse);
+            }
 
             // add text box
             renderOcLabel(p, element.businessObject.name || '', {x: cx, y: cy, fill: 'black', align: 'middle'});
@@ -638,7 +664,9 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             return this.drawCircle(p, element.width, element.height);
         }
 
-        if (type === 'ocbpmn:oval') {
+        if (type === 'ocbpmn:startobject' ||
+            type === 'ocbpmn:intermediateobject' ||
+            type === 'ocbpmn:endobject') {
             return this.drawOval(element, p, element.width, element.height);
         }
 

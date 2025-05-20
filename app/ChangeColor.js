@@ -13,7 +13,7 @@ export default function ChangeColor(modeler) {
 
     elements.forEach(element => {
 
-      if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:endoval') {
+      if (element.type === 'ocbpmn:startobject' || element.type === 'ocbpmn:endobject' || element.type === 'ocbpmn:intermediateobject') {
         // color oval
         element.businessObject.customColors = colors;
         var oval = elementRegistry.getGraphics(element);
@@ -221,7 +221,7 @@ export default function ChangeColor(modeler) {
   eventBus.on('element.changed', function(event) {
     var element = event.element;
 
-    if (element.type === 'ocbpmn:oval') {
+    if (element.type === 'ocbpmn:startobject') {
 
       // Sicherstellen, dass outgoing ein Array ist und Verbindungen enthält
       const outgoingCon = Array.isArray(element.outgoing) ? element.outgoing : [];
@@ -255,7 +255,7 @@ export default function ChangeColor(modeler) {
     if (element.type === 'ocbpmn:connection') {
       var source = element.source;
 
-      if (source && source.type === 'ocbpmn:oval' && source.businessObject.customColors) {
+      if (source && source.type === 'ocbpmn:startobject' && source.businessObject.customColors) {
         const sourceColors = source.businessObject.customColors;
 
         // Setze die Farben der Verbindung
