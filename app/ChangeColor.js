@@ -35,7 +35,7 @@ export default function ChangeColor(modeler) {
             };
 
             const conGraphics = elementRegistry.getGraphics(connection);
-            const conLine = conGraphics.querySelector('#ofCon-path');
+            const conLine = conGraphics.querySelector('path'); //was id #ofCon-path
             if (conLine) {
               conLine.style.stroke = colors.stroke;
               conLine.setAttribute('stroke', colors.stroke);
@@ -47,7 +47,8 @@ export default function ChangeColor(modeler) {
         element.businessObject.customColors = colors;
 
         var ocCon = elementRegistry.getGraphics(element);
-        var svgOcConLine = ocCon.querySelector('#ofCon-path');
+        //var svgOcConLine = ocCon.querySelector('#ofCon-path');
+        var svgOcConLine = ocCon.querySelector('path'); //was id #ofCon-path
         if (svgOcConLine) {
           svgOcConLine.style.stroke = colors.stroke;
           svgOcConLine.setAttribute('stroke', colors.stroke);

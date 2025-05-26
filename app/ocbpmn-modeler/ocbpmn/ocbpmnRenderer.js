@@ -21,7 +21,7 @@ var COLOR_GREEN  = '#52B415',
 
 function renderOcLabel(parentGfx, label, options = {}) {
     const text = svgCreate('text');
-    svgAttr(text, {
+    const attrs = {
         x: options.x || 0,
         y: options.y || 0,
         fill: options.fill || 'black',
@@ -29,7 +29,11 @@ function renderOcLabel(parentGfx, label, options = {}) {
         'dominant-baseline': 'central',
         'font-size': options.fontSize || '12px',
         'font-family': options.fontFamily || 'Arial, sans-serif'
-    });
+    };
+    //if (options.id) {
+      //  attrs.id = options.id;
+    //}
+    svgAttr(text, attrs);
     text.textContent = label;
     svgAppend(parentGfx, text);
     return text;
@@ -549,19 +553,19 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
             }; */
 
-        this.drawocbpmnConnection = function (p, element) {
+        this.drawocbpmnConnection = function (p, element, color = {fill: '#6691FF', stroke: '#0048FF'}) {
+
             // neu: source color finden
-            const color = {
+            const customColor = { // Renamed to avoid conflict with the function parameter 'color'
                 fill: element.businessObject?.customColors?.fill || COLOR_STROKEBLUE,
                 stroke: element.businessObject?.customColors?.stroke || COLOR_STROKEBLUE
             };
 
             // style for line
-            var attrs = computeStyle(attrs, {
-                id: 'ofCon-path',
-                //fill: color.fill, //if included the new color wont change, if not incl changeable ?? //not anymore??
-                stroke: color.stroke, //if not incl then no stroke color at all, if incl not changeable either
-                //stroke: element.businessObject?.customColors?.stroke || color.stroke,
+            var attrs = computeStyle({}, { // Pass empty object for baseAttrs if none
+                //id: 'ofCon-path', // <g class="djs-visual"> -> <path id="ofCon-path"> // maybe this is confusing the element.id in label rendering
+                //class: 'ofCon-path', //try class instead of id
+                stroke: customColor.stroke,
                 strokeWidth: 2,
                 strokeLinecap: 'round',
                 strokeDasharray: '0, 5',
@@ -569,11 +573,40 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             });
 
             // create the connection line
+            var connectionGfx = createLine(element.waypoints, attrs); // Renamed to avoid conflict
+            svgAppend(p, connectionGfx);
 
-            //var connection = createLine(element.waypoints, attrs, 5);
-            //no radius ?
-            var connection = createLine(element.waypoints, attrs);
-            svgAppend(p, connection);
+            // Add label to connection
+            if (element.businessObject.name) {
+                const label = element.businessObject.name;
+                const waypoints = element.waypoints;
+                let midPoint;
+
+                if (waypoints.length === 2) {
+                    midPoint = {
+                        x: (waypoints[0].x + waypoints[1].x) / 2,
+                        y: (waypoints[0].y + waypoints[1].y) / 2
+                    };
+                } else {
+                    // For connections with more than two waypoints, find the middle segment
+                    const midIndex = Math.floor((waypoints.length - 1) / 2);
+                    midPoint = {
+                        x: (waypoints[midIndex].x + waypoints[midIndex + 1].x) / 2,
+                        y: (waypoints[midIndex].y + waypoints[midIndex + 1].y) / 2
+                    };
+                }
+                // Adjust label position slightly to avoid overlapping the line
+                midPoint.y -= 10; // Offset the label above the line
+
+                renderOcLabel(p, label, {
+                   // id: `connection-label-${element.id}`,
+                    x: midPoint.x,
+                    y: midPoint.y,
+                    fill: 'black',
+                    align: 'middle',
+                    fontSize: '12px'
+                });
+            }
 
             // check if marker already exists
             var defs = p.closest('svg').querySelector('defs');
@@ -601,17 +634,17 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
                 svgAttr(markerPath, {
                     id: 'ofMarker-path',
                     d: 'M 1 5 L 11 10 L 1 15 Z', //triangle
-                    fill: '#000000', //color.fill,
-                    stroke: '#000000', //color.stroke,
+                    fill: '#000000',
+                    stroke: '#000000',
                     strokeWidth: 1,
 
                 });
 
-                svgAppend(marker, markerPath); // add path how to draw marker #ofEnd to marker svg element
-                svgAppend(defs, marker); // add marker element to defs of svg of p (parentnode)
+                svgAppend(marker, markerPath);
+                svgAppend(defs, marker);
             }
 
-            return connection;
+            return connectionGfx; // Return the graphics element
         };
 
 

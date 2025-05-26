@@ -77,8 +77,8 @@ ocbpmnRules.prototype.init = function() {
 
       console.log('OCBPMN RULES: Create Event - baseCanConnect');
       console.log('  Intent from Service:', intent);
-      console.log('  Source Type:', source.type);
-      console.log('  Target Type:', target.type);
+      console.log('  Source Type:', source);
+      console.log('  Target Type:', target);
 
       if (intent === 'ocbpmn:connection') {
         console.log('  Attempting OCBPMN Connection Create via Service Intent');
