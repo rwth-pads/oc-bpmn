@@ -41,9 +41,11 @@ function renderOcLabel(parentGfx, label, options = {}) {
 /**
  * A renderer that knows how to render ocbpmn elements.
  */
-export default function ocbpmnRenderer(eventBus, styles, canvas) {
+export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry) {
 
     BaseRenderer.call(this, eventBus, 2000);
+    this._elementRegistry = elementRegistry;
+    this._canvas = canvas;
     /*
 
     //function lineStyle(attrs) {
@@ -554,7 +556,6 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             }; */
 
         this.drawocbpmnConnection = function (p, element, color = {fill: '#6691FF', stroke: '#0048FF'}) {
-
             // neu: source color finden
             const customColor = { // Renamed to avoid conflict with the function parameter 'color'
                 fill: element.businessObject?.customColors?.fill || COLOR_STROKEBLUE,
@@ -563,8 +564,6 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
             // style for line
             var attrs = computeStyle({}, { // Pass empty object for baseAttrs if none
-                //id: 'ofCon-path', // <g class="djs-visual"> -> <path id="ofCon-path"> // maybe this is confusing the element.id in label rendering
-                //class: 'ofCon-path', //try class instead of id
                 stroke: customColor.stroke,
                 strokeWidth: 2,
                 strokeLinecap: 'round',
@@ -577,29 +576,32 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
             svgAppend(p, connectionGfx);
 
             // Add label to connection
-            if (element.businessObject.name) {
-                const label = element.businessObject.name;
-                const waypoints = element.waypoints;
-                let midPoint;
+            const waypoints = element.waypoints;
+            let midPoint;
 
-                if (waypoints.length === 2) {
-                    midPoint = {
-                        x: (waypoints[0].x + waypoints[1].x) / 2,
-                        y: (waypoints[0].y + waypoints[1].y) / 2
-                    };
-                } else {
-                    // For connections with more than two waypoints, find the middle segment
-                    const midIndex = Math.floor((waypoints.length - 1) / 2);
-                    midPoint = {
-                        x: (waypoints[midIndex].x + waypoints[midIndex + 1].x) / 2,
-                        y: (waypoints[midIndex].y + waypoints[midIndex + 1].y) / 2
-                    };
-                }
-                // Adjust label position slightly to avoid overlapping the line
-                midPoint.y -= 10; // Offset the label above the line
+            if (waypoints.length === 2) {
+                midPoint = {
+                    x: (waypoints[0].x + waypoints[1].x) / 2,
+                    y: (waypoints[0].y + waypoints[1].y) / 2
+                };
+            } else {
+                // For connections with more than two waypoints, find the middle segment
+                const midIndex = Math.floor((waypoints.length - 1) / 2);
+                midPoint = {
+                    x: (waypoints[midIndex].x + waypoints[midIndex + 1].x) / 2,
+                    y: (waypoints[midIndex].y + waypoints[midIndex + 1].y) / 2
+                };
+            }
+            // Adjust label position slightly to avoid overlapping the line
+            midPoint.y -= 10; // Offset the label above the line
 
+            // Only render label if it has a visualLabel (first connection in stack)
+            // or if it's a single connection (has name but no visualLabel)
+            const label = element.businessObject.visualLabel || 
+                         (!element.businessObject.visualLabel && element.businessObject.name ? element.businessObject.name : '');
+            
+            if (label) {
                 renderOcLabel(p, label, {
-                   // id: `connection-label-${element.id}`,
                     x: midPoint.x,
                     y: midPoint.y,
                     fill: 'black',
@@ -628,7 +630,6 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
                     orient: 'auto'
                 });
 
-
                 // create triangle path shape for marker
                 var markerPath = svgCreate("path");
                 svgAttr(markerPath, {
@@ -637,7 +638,6 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
                     fill: '#000000',
                     stroke: '#000000',
                     strokeWidth: 1,
-
                 });
 
                 svgAppend(marker, markerPath);
@@ -671,7 +671,7 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
 
     inherits(ocbpmnRenderer, BaseRenderer);
 
-    ocbpmnRenderer.$inject = ['eventBus', 'styles'];
+    ocbpmnRenderer.$inject = ['eventBus', 'styles', 'canvas', 'elementRegistry'];
 
 
     ocbpmnRenderer.prototype.canRender = function (element) {
@@ -733,17 +733,15 @@ export default function ocbpmnRenderer(eventBus, styles, canvas) {
     };
 
     ocbpmnRenderer.prototype.drawConnection = function (p, element) {
-
         var type = element.type;
 
         if (type === 'ocbpmn:connection') {
+            // Simply draw the connection as-is - stacking and labels are handled by the updater
             return this.drawocbpmnConnection(p, element);
         }
     };
 
-
     ocbpmnRenderer.prototype.getConnectionPath = function (connection) {
-
         var type = connection.type;
 
         if (type === 'ocbpmn:connection') {

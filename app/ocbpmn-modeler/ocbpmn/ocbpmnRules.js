@@ -36,16 +36,16 @@ ocbpmnRules.prototype.init = function() {
   var self = this;
 
   this._eventBus.on('commandStack.connection.create.postExecuted', function(event) {
-    console.log('OCBPMN RULES: commandStack.connection.create.postExecuted - Clearing Intent');
+    //console.log('OCBPMN RULES: commandStack.connection.create.postExecuted - Clearing Intent');
     self._ocbpmnConnectionIntent.clearIntent();
   });
 
   this._eventBus.on('connect.cancel', function(event) {
-    console.log('OCBPMN RULES: connect.cancel - Clearing Intent');
+    //console.log('OCBPMN RULES: connect.cancel - Clearing Intent');
     self._ocbpmnConnectionIntent.clearIntent();
   });
   this._eventBus.on('connect.cleanup', function(event) {
-    console.log('OCBPMN RULES: connect.cleanup - Clearing Intent if not already cleared by postExecute');
+    //console.log('OCBPMN RULES: connect.cleanup - Clearing Intent if not already cleared by postExecute');
     if (self._ocbpmnConnectionIntent.getIntent()) {
         // Decided to comment this out to rely primarily on postExecuted and cancel.
         // Clearing too aggressively might lead to the original problem.
@@ -75,13 +75,13 @@ ocbpmnRules.prototype.init = function() {
     if (eventType === 'create') {
       intent = self._ocbpmnConnectionIntent.getIntent();
 
-      console.log('OCBPMN RULES: Create Event - baseCanConnect');
-      console.log('  Intent from Service:', intent);
-      console.log('  Source Type:', source);
-      console.log('  Target Type:', target);
+      //console.log('OCBPMN RULES: Create Event - baseCanConnect');
+      //console.log('  Intent from Service:', intent);
+      //console.log('  Source Type:', source);
+      //console.log('  Target Type:', target);
 
       if (intent === 'ocbpmn:connection') {
-        console.log('  Attempting OCBPMN Connection Create via Service Intent');
+        //console.log('  Attempting OCBPMN Connection Create via Service Intent');
         if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
             (target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' || target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
           return { type: 'ocbpmn:connection' };
@@ -99,6 +99,7 @@ ocbpmnRules.prototype.init = function() {
     } else if (eventType === 'reconnect') {
       const connection = connectionOrContext;
       if (connection.type === 'ocbpmn:connection') {
+        console.log("Attempting ocbpmn reconnect for ocbpmn:connection");
         if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' || source.type === 'bpmn:Task' || source.type === 'bpmn:Gateway') &&
             (target.type === 'ocbpmn:startobject' || target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||  target.type === 'bpmn:Task' || target.type === 'bpmn:Gateway')) {
           return { type: 'ocbpmn:connection' };
