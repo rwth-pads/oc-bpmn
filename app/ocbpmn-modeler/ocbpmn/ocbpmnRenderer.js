@@ -595,10 +595,11 @@ export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry
             // Adjust label position slightly to avoid overlapping the line
             midPoint.y -= 10; // Offset the label above the line
 
-            // Only render label if it has a visualLabel (first connection in stack)
-            // or if it's a single connection (has name but no visualLabel)
-            const label = element.businessObject.visualLabel || 
-                         (!element.businessObject.visualLabel && element.businessObject.name ? element.businessObject.name : '');
+            // For single connections, show name. For related connections, only show visualLabel if it exists
+            const isRelatedConnection = element.businessObject.visualLabel !== undefined;
+            const label = isRelatedConnection ? 
+                         element.businessObject.visualLabel : 
+                         element.businessObject.name || '';
             
             if (label) {
                 renderOcLabel(p, label, {

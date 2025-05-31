@@ -23,8 +23,11 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
   this._elementRegistry = elementRegistry;
   this._eventBus = eventBus;
 
+  // Make updateRelatedConnections accessible
+  this.updateRelatedConnections = updateRelatedConnections;
+
   function updateocbpmnElement(e) {
-    console.log("OCPMN UPDATER: updateocbpmnElement called", e);
+    console.log('OCPMN UPDATER: updateocbpmnElement called', e);
     var context = e.context,
         shape = context.shape,
         businessObject = shape.businessObject;
@@ -50,17 +53,22 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
   // Helper function to update all related connections
   function updateRelatedConnections(connection) {
+    console.log("OCBPMN UPDATER: updateRelatedConnections called for connection:", connection.id);
     const source = connection.source;
     const target = connection.target;
 
     if (!source || !target) return;
 
+    // Get all connections between the same source and target
     const allConnections = elementRegistry.filter(e =>
       e.type === 'ocbpmn:connection' &&
       e.source && e.target &&
       e.source.id === source.id &&
       e.target.id === target.id
     ).sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+
+    console.log("OCBPMN UPDATER all related arcs array allConnections:", allConnections);
+    console.log("connection names:", allConnections.map(c => c.businessObject.name));
 
     if (allConnections.length > 1) {
       const Y_AXIS_STACK_OFFSET = 10;
@@ -74,6 +82,18 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         }
       });
 
+      // First, collect all valid names
+      const validNames = allConnections
+        .map(c => {
+          const name = c.businessObject.name || '';
+          console.log(`Connection ${c.id} name:`, name);
+          return name;
+        })
+        .filter(name => name && name.trim() !== '');
+
+      console.log("Valid names collected:", validNames);
+
+      // Update all connections with new waypoints and labels
       allConnections.forEach((conn, index) => {
         const yOffset = index * Y_AXIS_STACK_OFFSET;
         const offsetWaypoints = baseWaypoints.map(wp => ({
@@ -90,41 +110,41 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
         // Handle labels
         if (index === 0) {
+          // First connection gets combined label as visualLabel only
+          const finalCombinedLabel = validNames.join('x');
+          console.log("First connection combined label:", finalCombinedLabel);
 
-          // Combine original labels for visualization
-          const combinedLabel = allConnections
-            .map(c => c.businessObject.originalLabel || '')
-            .filter(name => name)
-            .join('x');
+          // Set visualLabel to combined label
+          connBusinessObject.visualLabel = finalCombinedLabel;
 
-          // Store the combined label separately from the original
-          connBusinessObject.visualLabel = combinedLabel;
-          // Keep the original label
-          connBusinessObject.name = connBusinessObject.originalLabel;
+          // Force a complete redraw of the connection
+          eventBus.fire('element.changed', { element: conn });
+          eventBus.fire('element.updateLabel', { element: conn });
+          eventBus.fire('element.updateVisuals', { element: conn });
         } else {
+          // For stacked connections, set visualLabel to empty string to prevent name from showing
+          connBusinessObject.visualLabel = '';
 
-          // Keep original label but don't show it
-          connBusinessObject.name = connBusinessObject.originalLabel;
-          connBusinessObject.visualLabel = ' '; // Empty visual label for stacked connections
+          // Force a complete redraw of the connection
+          eventBus.fire('element.changed', { element: conn });
+          eventBus.fire('element.updateLabel', { element: conn });
+          eventBus.fire('element.updateVisuals', { element: conn });
         }
-
-        // Fire events to trigger immediate updates
-        eventBus.fire('element.changed', { element: conn });
-        eventBus.fire('element.labelChanged', { element: conn });
       });
-    } else {
+    } else if (allConnections.length === 1) {
+      // Single connection - don't set visualLabel so name will be shown
+      const businessObject = allConnections[0].businessObject;
+      businessObject.visualLabel = undefined;
 
-      // Single connection - restore original label if it exists
-      const businessObject = connection.businessObject;
-      if (businessObject.originalLabel) {
-        businessObject.name = businessObject.originalLabel;
-        businessObject.visualLabel = '';
-      }
+      // Force a complete redraw of the connection
+      eventBus.fire('element.changed', { element: allConnections[0] });
+      eventBus.fire('element.updateLabel', { element: allConnections[0] });
+      eventBus.fire('element.updateVisuals', { element: allConnections[0] });
     }
   }
 
   this.updateocbpmnConnection = function(e) {
-    console.log("OCBPMN UPDATER: updateocbpmnConnection called", e);
+    console.log('OCBPMN UPDATER: updateocbpmnConnection called', e);
     var context = e.context,
         connection = context.connection,
         source = connection.source,

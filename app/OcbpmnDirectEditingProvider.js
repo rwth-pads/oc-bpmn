@@ -1,4 +1,4 @@
-function OcbpmnDirectEditingProvider(directEditing, eventBus) {
+function OcbpmnDirectEditingProvider(directEditing, eventBus, ocbpmnUpdater) {
   directEditing.registerProvider(this);
 
   // activate text field
@@ -113,7 +113,17 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus) {
         element.type === 'ocbpmn:endobject' ||
         element.type === 'ocbpmn:connection') { // Added ocbpmn:connection
       element.businessObject.name = text;
-      eventBus.fire('element.changed', { element: element });
+      
+      // For connections, update related connections immediately
+      if (element.type === 'ocbpmn:connection') {
+        // Force update of the element in the registry
+        eventBus.fire('element.changed', { element: element });
+        
+        // Update related connections using the injected updater
+        ocbpmnUpdater.updateRelatedConnections(element);
+      } else {
+        eventBus.fire('element.changed', { element: element });
+      }
     }
   };
 
@@ -131,7 +141,7 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus) {
 
 }
 
-OcbpmnDirectEditingProvider.$inject = [ 'directEditing', 'eventBus' ];
+OcbpmnDirectEditingProvider.$inject = [ 'directEditing', 'eventBus', 'ocbpmnUpdater' ];
 
 export default {
   __init__: [ 'ocbpmnDirectEditingProvider' ],
