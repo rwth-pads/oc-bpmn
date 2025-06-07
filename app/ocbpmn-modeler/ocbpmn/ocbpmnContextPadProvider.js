@@ -88,8 +88,17 @@ export default function ocbpmnContextPadProvider(injector, connect, translate, o
 
     function startObjectConnect(event, element, autoActivate) {
       console.log('OCBPMN CONTEXT PAD: startObjectConnect (OCBPMN) called');
-      ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
-      console.log('OCBPMN CONTEXT PAD: Intent set to ocbpmn:connection');
+      // Store the current connection type if we're reconnecting
+      const currentConnection = element.type === 'ocbpmn:connection' ? element : null;
+      console.log("OCBPMN CONTEXT PAD: Current connection type:", currentConnection);
+
+      // Always set the intent to ocbpmn:connection for reconnection
+      if (currentConnection) {
+        ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
+      } else {
+        ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
+      }
+      console.log('OCBPMN CONTEXT PAD: Intent set to', ocbpmnConnectionIntent.getIntent());
       connect.start(event, element, autoActivate);
     }
 
@@ -109,7 +118,7 @@ export default function ocbpmnContextPadProvider(injector, connect, translate, o
     }
 
     // Add ocbpmn connections for specified elements
-    if (isAny(businessObject, [ 'ocbpmn:startobject', 'ocbpmn:intermediateobject', 'ocbpmn:circle', 'ocbpmn:hexagon', 'ocbpmn:join', 'bpmn:Task', 'bpmn:Gateway' ])) {
+    if (isAny(businessObject, [ 'ocbpmn:startobject', 'ocbpmn:intermediateobject', 'bpmn:Task', 'bpmn:Gateway', 'bpmn:IntermediateThrowEvent' ])) {
       assign(actions, {
         'object-connect': {
           group: 'connect',
