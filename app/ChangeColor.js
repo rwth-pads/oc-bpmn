@@ -1,6 +1,9 @@
+import { assign } from 'min-dash';
+
 export default function ChangeColor(modeler) {
   var modeling = modeler.get('modeling');
   var elementRegistry = modeler.get('elementRegistry');
+
   // var canvas = modeler.get('canvas'); // Access the canvas
   var eventBus = modeler.get('eventBus');
 
@@ -14,6 +17,7 @@ export default function ChangeColor(modeler) {
     elements.forEach(element => {
 
       if (element.type === 'ocbpmn:startobject' || element.type === 'ocbpmn:endobject' || element.type === 'ocbpmn:intermediateobject') {
+
         // color oval
         element.businessObject.customColors = colors;
         var oval = elementRegistry.getGraphics(element);
@@ -35,7 +39,7 @@ export default function ChangeColor(modeler) {
             };
 
             const conGraphics = elementRegistry.getGraphics(connection);
-            const conLine = conGraphics.querySelector('path'); //was id #ofCon-path
+            const conLine = conGraphics.querySelector('path'); // was id #ofCon-path
             if (conLine) {
               conLine.style.stroke = colors.stroke;
               conLine.setAttribute('stroke', colors.stroke);
@@ -43,21 +47,25 @@ export default function ChangeColor(modeler) {
           }
         });
       } else if (element.type === 'ocbpmn:connection') {
+
         // color connection
         element.businessObject.customColors = colors;
 
         var ocCon = elementRegistry.getGraphics(element);
-        //var svgOcConLine = ocCon.querySelector('#ofCon-path');
-        var svgOcConLine = ocCon.querySelector('path'); //was id #ofCon-path
+
+        // var svgOcConLine = ocCon.querySelector('#ofCon-path');
+        var svgOcConLine = ocCon.querySelector('path'); // was id #ofCon-path
         if (svgOcConLine) {
           svgOcConLine.style.stroke = colors.stroke;
           svgOcConLine.setAttribute('stroke', colors.stroke);
         }
+
         // save manually set custom color
-        //element.businessObject.customColors = colors;
-        //eventBus.fire('element.changed', { element: element });
+        // element.businessObject.customColors = colors;
+        // eventBus.fire('element.changed', { element: element });
 
       } else if (element.type === 'ocbpmn:hexagon') {
+
         // color hexagon
         const gfx = elementRegistry.getGraphics(element);
         const svgPath = gfx.querySelector('.fill-path');
@@ -73,8 +81,10 @@ export default function ChangeColor(modeler) {
       } else {
         originalSetColor.call(this, [ element ], colors);
       }
+
       // trigger a redraw/update of the element
       eventBus.fire('element.changed', { element: element });
+
       /*
         if (element.type === 'ocbpmn:oval' || element.type === 'ocbpmn:hexagon') {
             this._commandStack.execute('element.setColor')
@@ -216,40 +226,63 @@ export default function ChangeColor(modeler) {
     });
   };
 
-
-  // watch source color
-
+  // Listen for element changes to update colors
   eventBus.on('element.changed', function(event) {
     var element = event.element;
 
+    // Update colors and names for all related connections when a startobject is changed
     if (element.type === 'ocbpmn:startobject') {
 
       // Sicherstellen, dass outgoing ein Array ist und Verbindungen enthält
       const outgoingCon = Array.isArray(element.outgoing) ? element.outgoing : [];
       const sourceColors = element.businessObject.customColors;
+      const relatedConnections = elementRegistry.filter(e =>
+        e.type === 'ocbpmn:connection' &&
+        (e.businessObject.name === element.businessObject.name ||
+          e.target.type === 'ocbpmn:endobject' && e.target.businessObject.name === element.businessObject.name ||
+        e.businessObject.customColors === sourceColors)
+      );
+      console.log('CHANGECOLOR: eventBus element.changed for ocbpmn:startobject:', element, 'and relatedConnections:', relatedConnections);
 
-      if (sourceColors){
+      if (sourceColors) {
         outgoingCon.forEach(connection => {
-          if (connection.type === 'ocbpmn:connection' && connection.businessObject.customColors?.auto !== false) {
-            connection.businessObject.customColors = {
-              fill: sourceColors.fill,
-              stroke: sourceColors.stroke,
-              auto: true
-            };
 
-            const conGraphics = elementRegistry.getGraphics(connection);
-            const conLine = conGraphics.querySelector('#ofCon-path');
-            if (conLine) {
-              conLine.style.stroke = sourceColors.stroke;
-              conLine.setAttribute('stroke', sourceColors.stroke);
-            }
+          // Set outgoing connections from startobject to the same color and name (but clear visualLabel for better readability)
+          if (connection.type === 'ocbpmn:connection') {
+            assign(connection.businessObject, {
+              customColors: sourceColors,
+              name: element.businessObject.name,
+              visualLabel: ''
+            });
           }
+        });
+
+        // Update the colors of all related connections in object flow path
+        relatedConnections.forEach(connection => {
+          assign(connection.businessObject, {
+            customColors: sourceColors,
+            name: element.businessObject.name
+          });
+
+          if (connection.target.type === 'ocbpmn:endobject') {
+            assign(connection.target.businessObject, {
+              customColors: sourceColors,
+              name: element.businessObject.name
+            });
+            assign(connection.businessObject, {
+              visualLabel: ''
+            });
+            eventBus.fire('element.changed', { element: connection.target });
+          }
+
+          eventBus.fire('element.changed', { element: connection });
         });
 
       }
     }
   });
-// hilft nicht
+
+  // hilft nicht
   eventBus.on('element.added', function(event) {
     var element = event.element;
 
