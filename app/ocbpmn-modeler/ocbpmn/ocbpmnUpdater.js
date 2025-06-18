@@ -332,7 +332,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     
     // Update new connections (without a set name) with customColors of startobject or related previous connections
     if (!connection.businessObject.name) {
-      console.log("OCBPMN UPDATER: new connection setting colors for connection", connection);
+      console.log("OCBPMN UPDATER: new connection setting colors for connection:", connection);
       // If multiple previous ocbpmn connections exist, the last one will set the color (good? idk)
       if (allPrevConnections.length > 0) {
       
