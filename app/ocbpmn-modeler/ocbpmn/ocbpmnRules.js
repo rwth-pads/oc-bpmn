@@ -1,5 +1,6 @@
 /* eslint-disable */
 import {
+  assign,
   reduce
 } from 'min-dash';
 
@@ -13,6 +14,7 @@ import RuleProvider from 'diagram-js/lib/features/rules/RuleProvider';
 import {isAny} from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 
 var HIGH_PRIORITY = 1500;
+var HIGHEST_PRIORITY = 2000;  // Higher than BPMN's default priority
 
 
 function isocbpmn(element) {
@@ -22,19 +24,21 @@ function isocbpmn(element) {
 /**
  * Specific rules for ocbpmn elements
  */
-export default function ocbpmnRules(eventBus, ocbpmnConnectionIntent, commandStack, elementRegistry) {
+export default function ocbpmnRules(eventBus, ocbpmnConnectionIntent, commandStack, elementRegistry, modeling, connect) {
   console.log('OCBPMN RULES: Initializing ocbpmnRules');
   RuleProvider.call(this, eventBus);
   this._ocbpmnConnectionIntent = ocbpmnConnectionIntent;
   this._eventBus = eventBus;
   this._commandStack = commandStack;
   this._elementRegistry = elementRegistry;
+  this._modeling = modeling;
+  this._connect = connect;
   console.log('OCBPMN RULES: ocbpmnRules initialized with eventBus:', eventBus);
 }
 
 inherits(ocbpmnRules, RuleProvider);
 
-ocbpmnRules.$inject = [ 'eventBus', 'ocbpmnConnectionIntent', 'commandStack', 'elementRegistry' ];
+ocbpmnRules.$inject = [ 'eventBus', 'ocbpmnConnectionIntent', 'commandStack', 'elementRegistry', 'modeling', 'connect' ];
 
 
 ocbpmnRules.prototype.init = function() {
@@ -51,7 +55,11 @@ ocbpmnRules.prototype.init = function() {
     'connect.cancel',
     'connect.cleanup',
     'commandStack.connection.create.preExecute',
-    'commandStack.connection.create.postExecuted'
+    'commandStack.connection.create.postExecuted',
+    'commandStack.connection.delete.preExecute',
+    'commandStack.connection.delete.postExecuted',
+    'commandStack.connection.reconnect.preExecute',
+    'commandStack.connection.reconnect.postExecuted'
   ], function(event) {
     console.log('OCBPMN RULES: Event received:', event.type, event);
   });
@@ -79,64 +87,51 @@ ocbpmnRules.prototype.init = function() {
    *                                     For 'connection.reconnect', this is the `connection` object.
    * @param {string} [eventType] - 'create' or 'reconnect' to differentiate context of hintsOrConnection.
    */
-  function baseCanConnect(source, target, connectionOrContext, eventType) {
-    var intent = null;
-    if (eventType === 'create') {
-      intent = self._ocbpmnConnectionIntent.getIntent();
-      //console.log('OCBPMN RULES: baseCanConnect create', { intent, source: source.type, target: target.type });
+  function canConnect(source, target, connectionOrContext, eventType) {
+    if (eventType === 'reconnect') {
+      // For reconnect, preserve the original connection type through the business object
+      const connectionType = connectionOrContext.businessObject ? connectionOrContext.businessObject.type : connectionOrContext.type;
+      console.log('OCBPMN RULES: canConnect reconnect - determined connection type:', connectionType);
 
-      if (intent === 'ocbpmn:connection') {
-        //console.log('OCBPMN RULES: Handling ocbpmn:connection creation');
-
+      if (connectionType === 'ocbpmn:connection') {
+        // Only check if the new source/target combination is valid
         if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
                 source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:ParallelGateway'
                 || source.type === 'bpmn:IntermediateThrowEvent') &&
             (target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
                 target.type === 'bpmn:Task' || target.type === 'bpmn:ExclusiveGateway' || target.type === 'bpmn:ParallelGateway'
                 || target.type === 'bpmn:IntermediateThrowEvent')) {
-          console.log('OCBPMN RULES: baseCanConnect create', { intent, source: source.type, target: target.type });
-          return { type: 'ocbpmn:connection' };
+          // Return the original connection type
+          return { type: connectionType };
         }
         return false;
       }
-      if (!isocbpmn(source) && !isocbpmn(target)) {
-        console.log('OCBPMN RULES: baseCanConnect create - neither source nor target is ocbpmn. intent is:', intent);
-        return undefined;
-      }
-      if (isocbpmn(source) || isocbpmn(target)) {
-        console.log(("OCBPMN RULES: baseCanConnect create - either source or target is ocbpmn BUT intent is:", intent));
-        return false;
-      }
-      return false;
     }
-    else if (eventType === 'reconnect') {
-      const connection = connectionOrContext;
-      if (connection.type === 'ocbpmn:connection' || connection.businessObject.type === 'ocbpmn:connection') {
-        //console.log('OCBPMN RULES: Handling ocbpmn:connection reconnection for connection', connection);
+    
+    if (eventType === 'create') {
+      const intent = self._ocbpmnConnectionIntent.getIntent();
+      console.log('OCBPMN RULES: canConnect create', { intent, source: source.type, target: target.type });
+
+      if (intent === 'ocbpmn:connection') {
         if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
-                source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:IntermediateThrowEvent') &&
+                source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:ParallelGateway'
+                || source.type === 'bpmn:IntermediateThrowEvent') &&
             (target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
-                target.type === 'bpmn:Task' || target.type === 'bpmn:ExclusiveGateway' || target.type === 'bpmn:IntermediateThrowEvent')) {
-            self._ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
-            connection.originalType = 'ocbpmn:connection'; // Store the original type for reconnection
-            console.log('OCBPMN RULES: baseCanConnect Reconnecting ocbpmn:connection',connection);
-            console.log("   (baseCanConnect) intent:", self._ocbpmnConnectionIntent.getIntent());
-
-
+                target.type === 'bpmn:Task' || target.type === 'bpmn:ExclusiveGateway' || target.type === 'bpmn:ParallelGateway'
+                || target.type === 'bpmn:IntermediateThrowEvent')) {
           return { type: 'ocbpmn:connection' };
         }
         return false;
       }
+      
       if (!isocbpmn(source) && !isocbpmn(target)) {
-        console.log('OCBPMN RULES: baseCanConnect reconnect - neither source nor target is ocbpmn. intent is:', self._ocbpmnConnectionIntent.getIntent());
         return undefined;
       }
       if (isocbpmn(source) || isocbpmn(target)) {
-        console.log("OCBPMN RULES: baseCanConnect reconnect - either source or target is ocbpmn BUT intent is:", self._ocbpmnConnectionIntent.getIntent());
         return false;
       }
-
     }
+    
     return false;
   }
 
@@ -176,9 +171,10 @@ ocbpmnRules.prototype.init = function() {
     console.log('OCBPMN RULES: addRule connection.create rule called', context);
     const source = context.source;
     const target = context.target;
-    return baseCanConnect(source, target, context, 'create');
+    return canConnect(source, target, context, 'create');
   });
 
+  /*
   // Add connection.delete rule with higher priority
   this.addRule('connection.delete', 2000, function(context) {
     console.log("OCBPMN RULES: addRule connection.delete rule called", context);
@@ -216,51 +212,73 @@ ocbpmnRules.prototype.init = function() {
     console.log('OCBPMN RULES: Allowing deletion of non-ocbpmn connection');
     return true;
   });
+  
+   */
 
 
-  this.addRule('connection.reconnect', HIGH_PRIORITY, function(context) {
-    console.log("OCBPMN RULES: addRule connection.reconnect rule called in context:", context);
+  this.addRule('connection.reconnect', HIGHEST_PRIORITY, function(context) {
+    console.log("OCBPMN RULES: connection.reconnect rule called", context);
     const connection = context.connection;
     const source = context.source;
     const target = context.target;
-    console.log("   connection details:", connection, "source:", source, "target:", target);
-    return baseCanConnect(source, target, connection, 'reconnect');
-  });
 
-  this.addRule('connection.remove', HIGH_PRIORITY, function(context) {
-    console.log("OCBPMN RULES: addRule connection.remove rule called in context:", context);
-  });
-
-  this.addRule("connection.updateWaypoints", HIGH_PRIORITY, function(context) {
-    console.log("OCBPMN RULES: addRule connection.updateWaypoints rule called in context:", context);
-  });
-
-  this.addRule('shape.delete', HIGH_PRIORITY, function(context) {
-    console.log("OCBPMN RULES: addRule shape.delete rule called in context:", context);
-  });
-
-  // Add direct connection.delete event handler
-  this._eventBus.on('connection.delete', function(event) {
-    console.log('OCBPMN RULES: connection.delete event handler called:', event);
-    const connection = event.context.connection;
-    if (connection && connection.type === 'ocbpmn:connection') {
-      console.log('OCBPMN RULES: Preventing direct deletion of ocbpmn:connection');
-      event.preventDefault();
-      event.stopPropagation();
+    if (connection.type === 'ocbpmn:connection' ||
+        (connection.businessObject && connection.businessObject.type === 'ocbpmn:connection')) {
+      console.log("OCBPMN RULES: Handling ocbpmn connection reconnection", {connection, source, target});
+      
+      // Check if source is valid
+      if (source && (source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
+          source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:ParallelGateway'
+          || source.type === 'bpmn:IntermediateThrowEvent')) {
+        console.log("OCBPMN RULES: Valid source for reconnection", source);
+        return { type: 'ocbpmn:connection' };
+      }
+      
+      // Check if target is valid
+      if (target && (target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
+          target.type === 'bpmn:Task' || target.type === 'bpmn:ExclusiveGateway' || target.type === 'bpmn:ParallelGateway'
+          || target.type === 'bpmn:IntermediateThrowEvent')) {
+        console.log("OCBPMN RULES: Valid target for reconnection", target);
+        return { type: 'ocbpmn:connection' };
+      }
+      
+      // If we get here, neither source nor target is valid
+      console.log("OCBPMN RULES: Invalid source/target for reconnection, preventing", {source, target});
       return false;
     }
   });
-
-  // Add handler for element registry updates
-  this._eventBus.on('elementRegistry.update', function(event) {
-    console.log('OCBPMN RULES: elementRegistry.update event:', event);
-    const element = event.element;
-    if (element && element.type === 'ocbpmn:connection') {
-      console.log('OCBPMN RULES: Preventing element registry update for ocbpmn:connection');
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
+  
+  /*
+  this.addRule('connection.reconnectEnd', HIGHEST_PRIORITY, function(context) {
+    console.log("OCBPMN RULES: addRule connection.reconnectEnd rule called in context:", context);
+    
+    const connection = context.connection;
+    
+    // Check if this is an ocbpmn connection
+    const isOcbpmnConnection = connection.type === 'ocbpmn:connection' ||
+                             (connection.businessObject && connection.businessObject.type === 'ocbpmn:connection') ||
+                             (context.originalType === 'ocbpmn:connection');
+    
+    if (isOcbpmnConnection) {
+      // Force the connection type to be ocbpmn:connection
+      connection.type = 'ocbpmn:connection';
+      if (connection.businessObject) {
+        connection.businessObject.type = 'ocbpmn:connection';
+      }
+      
+      // Trigger a redraw of the connection
+      self._eventBus.fire('element.changed', { element: connection });
+      
+      return {
+        type: 'ocbpmn:connection',
+        businessObject: connection.businessObject
+      };
     }
+    
+    return undefined;
   });
-
+  
+   */
+  
 };
+

@@ -597,8 +597,8 @@ export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry
 
             // For single connections, show name. For related connections, only show visualLabel if it exists
             const isRelatedConnection = element.businessObject.visualLabel !== undefined;
-            const label = isRelatedConnection ? 
-                         element.businessObject.visualLabel : 
+            const label = isRelatedConnection ?
+                         element.businessObject.visualLabel :
                          element.businessObject.name || '';
             
             if (label) {
@@ -635,10 +635,12 @@ export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry
                 var markerPath = svgCreate("path");
                 svgAttr(markerPath, {
                     id: 'ofMarker-path',
-                    d: 'M 1 5 L 11 10 L 1 15 Z', //triangle
-                    fill: '#000000',
+                    d: 'M 1 5 L 11 10 L 1 15', //triangle
+                    fill: 'none',
                     stroke: '#000000',
-                    strokeWidth: 1,
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    strokeWidth: 1.5,
                 });
 
                 svgAppend(marker, markerPath);

@@ -230,20 +230,25 @@ export default function ChangeColor(modeler) {
   eventBus.on('element.changed', function(event) {
     var element = event.element;
 
-    // Update colors and names for all related connections when a startobject is changed
+    // Update element and entire related object flow on startobject change
     if (element.type === 'ocbpmn:startobject') {
-
+      
       // Sicherstellen, dass outgoing ein Array ist und Verbindungen enthält
       const outgoingCon = Array.isArray(element.outgoing) ? element.outgoing : [];
       const sourceColors = element.businessObject.customColors;
+      const sourceName = element.businessObject.name;
+      // Find all related connection from object flow path (have the same name or the target is an endobject with the same name)
       const relatedConnections = elementRegistry.filter(e =>
         e.type === 'ocbpmn:connection' &&
-        (e.businessObject.name === element.businessObject.name ||
-          e.target.type === 'ocbpmn:endobject' && e.target.businessObject.name === element.businessObject.name ||
-        e.businessObject.customColors === sourceColors)
+        ((e.businessObject && e.businessObject.name === element.businessObject.name) ||
+          (e.target && e.target.type === 'ocbpmn:endobject' && e.target.businessObject && e.target.businessObject.name === element.businessObject.name) ||
+          (e.businessObject && e.businessObject.customColors === sourceColors) ||
+          (e.businessObject && e.businessObject.name && e.businessObject.name.startsWith(sourceName + ' '))
+        )
       );
-      console.log('CHANGECOLOR: eventBus element.changed for ocbpmn:startobject:', element, 'and relatedConnections:', relatedConnections);
-
+      console.log('CHANGECOLOR: eventBus element.changed for ocbpmn:startobject:', element, 'and relatedConnections:', relatedConnections, 'event:', event);
+      
+      // Update customColors of related object flow connections on color change of startobject
       if (sourceColors) {
         outgoingCon.forEach(connection => {
 
@@ -261,8 +266,11 @@ export default function ChangeColor(modeler) {
         relatedConnections.forEach(connection => {
           assign(connection.businessObject, {
             customColors: sourceColors,
+            //visualLabel: connection.businessObject.name,
             name: element.businessObject.name
           });
+          
+          // TODO: what to do with states in label ??? visuallabel vs name better diff
 
           if (connection.target.type === 'ocbpmn:endobject') {
             assign(connection.target.businessObject, {
@@ -276,10 +284,46 @@ export default function ChangeColor(modeler) {
           }
 
           eventBus.fire('element.changed', { element: connection });
+          eventBus.fire('element.updateLabel', { element: connection });
+          
         });
 
       }
+      
+      // Update labels of all related connections in object flow path if the object name is changed
+      //if (sourceName) {
+      
+      //}
     }
+    /*
+    else if (element.type === 'ocbpmn:connection') {
+     
+      const connectionColors = element.businessObject.customColors;
+      
+      if (connectionColors) {
+        
+        const parallelSequenceArr = elementRegistry.filter(conn =>
+          conn.type === 'bpmn:SequenceFlow' &&
+          conn.source.id === element.source.id &&
+          conn.target.id === element.target.id);
+        
+        if (parallelSequenceArr) {
+          const parallelSequence = parallelSequenceArr[0];
+          
+          // Update the color of the connection
+          modeling.setColor(parallelSequence, {
+            stroke: connectionColors.stroke,
+            fill: connectionColors.fill
+          });
+          
+          
+        }
+      }
+      
+    }
+    
+     */
+    
   });
 
   // hilft nicht

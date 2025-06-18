@@ -114,13 +114,13 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus, ocbpmnUpdater) {
         element.type === 'ocbpmn:connection') { // Added ocbpmn:connection
       element.businessObject.name = text;
       
-      // For connections, update related connections immediately
+      // For connections, update immediately
       if (element.type === 'ocbpmn:connection') {
         // Force update of the element in the registry
         eventBus.fire('element.changed', { element: element });
         
-        // Update related connections using the injected updater
-        ocbpmnUpdater.updateRelatedConnections(element);
+        // Update stacked connections using the injected updater
+        ocbpmnUpdater.updateStackedConnections(element);
       } else {
         eventBus.fire('element.changed', { element: element });
       }

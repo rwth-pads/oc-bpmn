@@ -88,7 +88,7 @@ export default function ocbpmnContextPadProvider(injector, connect, translate, o
 
     function startObjectConnect(event, element, autoActivate) {
       console.log('OCBPMN CONTEXT PAD: startObjectConnect (OCBPMN) called');
-      // Store the current connection type if we're reconnecting
+      // Store the current connection type if we're reconnecting //element is source tho??
       const currentConnection = element.type === 'ocbpmn:connection' ? element : null;
       console.log("OCBPMN CONTEXT PAD: Current connection type:", currentConnection);
 
