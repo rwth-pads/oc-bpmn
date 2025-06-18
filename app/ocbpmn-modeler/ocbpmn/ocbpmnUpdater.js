@@ -328,7 +328,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         e.source && e.target &&
         e.target?.id === connection.source?.id
         );
-    console.log("allPrevConnections:", allPrevConnections, "of connection", connection);
+    console.log("allPrevConnections:", allPrevConnections, "of connection:", connection);
     
     // Update new connections (without a set name) with customColors of startobject or related previous connections
     if (!connection.businessObject.name) {
