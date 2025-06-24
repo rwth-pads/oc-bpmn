@@ -57,8 +57,20 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     }
   });
   
-  eventBus.on('connection.changed', function(e) {
-    console.log("OCBPMN UPDATER: connection.changed event fired", e);
+  eventBus.on('shape.changed', function(e) {
+    console.log("OCBPMN UPDATER: shape.changed event fired", e);
+    const shape = e.element;
+    const shapeBusinessObject = shape.businessObject;
+    const shapeName = shapeBusinessObject.name;
+    
+    // Update shape when ocbpmn object named
+    if (isocbpmn(shape) && shapeName) {
+      updateocbpmnElement(e);
+    }
+    
+    if (isocbpmn(shape) && shape.type === 'ocbpmn:startobject') {
+    
+    }
   });
   
   eventBus.on('element.updateLabel', function(e) {
@@ -141,8 +153,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
   function updateocbpmnElement(e) {
     console.log('OCPMN UPDATER: updateocbpmnElement called', e);
-    var context = e.context,
-        shape = context.shape,
+    var shape = (e.context && e.context.shape) || e.element,
         businessObject = shape && shape.businessObject;
 
     if (!shape || !businessObject || !isocbpmn(shape)) {
@@ -165,20 +176,41 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     
     // Store original label when it's first set
     if (businessObject.name && !businessObject.originalLabel) {
-      businessObject.originalLabel = businessObject.name;
-      console.log("OCBPMN UPDATER: Storing original label for element:", businessObject.originalLabel);
+      const ocbpmnObjects = elementRegistry.filter(e =>
+        e.type === 'ocbpmn:startobject' && e.businessObject.originalLabel &&
+        e.businessObject.originalLabel === businessObject.name
+      );
+      
+      if (ocbpmnObjects.length > 0) {
+        alert("OCBPMN UPDATER: Element with name '" + businessObject.name + "' already exists in the diagram. Please use a different name.");
+      } else {
+        assign(businessObject, {
+          originalLabel: businessObject.name
+        });
+        console.log("OCBPMN UPDATER: Storing original label for element:", businessObject.originalLabel);
+      }
     }
     
     // Assign default colors if customColors are not set
-    if (!businessObject.customColors){
-      assign(businessObject, {
-        customColors: COLOR_OCBPMN_DEFAULT
-      });
-    }
+   // if (!businessObject.customColors){
+     // assign(businessObject, {
+       // customColors: COLOR_OCBPMN_DEFAULT
+      //});
+    //}
 
     // save ocbpmn element position
     assign(businessObject, pick(shape, [ 'x', 'y' ]));
 
+  }
+  
+  // Helper function to get object flow path connections
+  function getObjectFlowPathConnections(element) {
+    const objectFlowPathConnections = elementRegistry.filter(e =>
+      e.type === 'ocbpmn:connection' && e.businessObject && e.businessObject.originalLabel &&
+      e.businessObject.originalLabel === element.businessObject.originalLabel);
+    
+    console.log("OCBPMN UPDATER: getObjectFlowPathConnections found connections:", objectFlowPathConnections);
+    return objectFlowPathConnections;
   }
 
   // Helper function to update all connections with same source and target
@@ -319,7 +351,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     }
   }
   
-  // Update related connections colors based on the source connection
+  // Add connection to the current object flow path (update customColors and name)
   function updateRelatedConnections(connection, event) {
     console.log("OCBPMN UPDATER: updateRelatedConnections called for event:", event, "connection:", connection);
     // All previous connections on the same path (connection.source is the target of the previous connections)
@@ -328,40 +360,41 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         e.source && e.target &&
         e.target?.id === connection.source?.id
         );
-    console.log("allPrevConnections:", allPrevConnections, "of connection:", connection);
+    console.log("allPrevConnections:", allPrevConnections, "of connection", connection);
     
     // Update new connections (without a set name) with customColors of startobject or related previous connections
     if (!connection.businessObject.name) {
-      console.log("OCBPMN UPDATER: new connection setting colors for connection:", connection);
+      console.log("OCBPMN UPDATER new connection setting colors for connection", connection);
       // If multiple previous ocbpmn connections exist, the last one will set the color (good? idk)
       if (allPrevConnections.length > 0) {
       
-        allPrevConnections.forEach(conn => {
-          if (conn.businessObject.customColors) {
-            console.log("OCBPMN UPDATER: Updating connection color for:", conn.id);
+        allPrevConnections.forEach(prevCon => {
+          if (prevCon.businessObject.customColors) {
             // Update the connection's businessObject with the customColors from the source
             assign(connection.businessObject, {
-              customColors: conn.businessObject.customColors
+              customColors: prevCon.businessObject.customColors
             });
             if (connection.target.type === 'ocbpmn:endobject') {
               assign(connection.target.businessObject, {
-              customColors: conn.businessObject.customColors
+              customColors: prevCon.businessObject.customColors
               });
             }
             // Fire event to trigger immediate color update
             eventBus.fire('element.changed', {element: connection});
           }
-          if (conn.source.type === 'ocbpmn:startobject' && conn.source.businessObject.name) {
+          if (prevCon.source.type === 'ocbpmn:startobject' && prevCon.source.businessObject.name) {
             // Update the connection's businessObject with the name from the source
             assign(connection.businessObject, {
-              name: conn.source.businessObject.name
+              name: prevCon.source.businessObject.name,
+              originalLabel: prevCon.source.businessObject.originalLabel
             });
             // Fire event to trigger immediate label update
             eventBus.fire('element.changed', {element: connection});
-          } else if (conn.businessObject.name) {
+          } else if (prevCon.businessObject.name) {
             // If the source is not a startobject, use the previous connection's name for intermediate connections
             assign(connection.businessObject, {
-              name: conn.businessObject.name
+              name: prevCon.businessObject.name,
+              originalLabel: prevCon.businessObject.originalLabel
             });
             //console.log("OCBPMN UPDATER: ENDARC Updating connection name for:", connection, "with target.type:", connection.target.type);
             if (connection.target.type === 'ocbpmn:endobject') {
@@ -369,7 +402,8 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
                 visualLabel: ""
               });
               assign(connection.target.businessObject, {
-                name: conn.businessObject.name
+                name: prevCon.businessObject.name,
+                originalLabel: prevCon.businessObject.originalLabel
               });
               eventBus.fire('element.changed', {element: connection.target});
               console.log("OCBPMN UPDATER: ENDARC Setting visualLabel to empty string for endobject connection:", connection);
@@ -380,13 +414,19 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         });
       } else if (connection.source && connection.source.type === 'ocbpmn:startobject') {
         // First connection on the path, set customColors and name from startobject
+        const sourceObj = connection.source;
+        const sourceObjBusinessObject = sourceObj.businessObject;
         console.log("OCBPMN UPDATER: updateRelatedConnections: connection.source is a startobject, setting customColors and name:", connection);
         assign(connection.businessObject, {
-          customColors: connection.source.customColors || connection.source.businessObject.customColors || COLOR_OCBPMN_DEFAULT,
-          name: connection.source.businessObject.name || '',
+          customColors: sourceObj.customColors || sourceObjBusinessObject.customColors || COLOR_OCBPMN_DEFAULT,
+          name: sourceObjBusinessObject.name || '',
+          originalLabel: sourceObjBusinessObject.originalLabel,
           visualLabel: ''
         });
+        //console.log("OCBPMN UPDATER: updateRelatedConnections: connection.businessObject after updates:", connection.businessObject);
       }
+      console.log("OCBPMN UPDATER: updateRelatedConnections connection.businessObject after updates:", connection.businessObject);
+      getObjectFlowPathConnections(connection);
     }
   }
 
@@ -411,20 +451,10 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
     // make sure element is added / removed from bpmnjs.ocbpmnElements unless originalType is 'ocbpmn:connection'
     if (!parent) {
-        console.log('OCBPMN UPDATER: Removing ocbpmn connection from bpmnjs.ocbpmnElements: case !parent');
       collectionRemove(ocbpmnElements, businessObject);
     } else {
-        console.log('OCBPMN UPDATER: Adding ocbpmn connection to bpmnjs.ocbpmnElements: case with parent');
       collectionAdd(ocbpmnElements, businessObject);
     }
-
-    // Store original label when it's first set
-    if (businessObject.name && !businessObject.originalLabel) {
-      businessObject.originalLabel = businessObject.name;
-    }
-
-    // Update all related connections
-    //updateStackedConnections(connection); //bo not accessible here, so moved to the end
 
     if (source && target) {
       assign(businessObject, {
@@ -442,17 +472,9 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
       // Fire event to trigger immediate color update
       eventBus.fire('element.changed', { element: connection });
     }
-    
-    //if (source && source.type === 'ocbpmn:startobject' && source.businessObject.name) {
-      //assign(businessObject, {
-        //name: source.businessObject.name,
-    //visualLabel: ''
-      //});
-      //eventBus.fire('element.changed', { element: connection });
-    //}
-
-    // Update all related connections
+    // Add new connection to current object flow path
     updateRelatedConnections(connection, e);
+    // Update stacked connections
     updateStackedConnections(connection, e);
 
     // update endobject color if target is ocbpmn:endobject and incoming connection has customColors
