@@ -18,12 +18,15 @@ export default function ocbpmnModeler(options) {
 
 inherits(ocbpmnModeler, Modeler);
 
+/*
 ocbpmnModeler.prototype._modules = [].concat(
   ocbpmnModeler.prototype._modules,
   [
     ocbpmnModule
   ]
 );
+
+ */
 
 /**
  * Add a single ocbpmn element to the underlying diagram
@@ -116,3 +119,48 @@ ocbpmnModeler.prototype.getocbpmnElements = function() {
 function isocbpmnConnection(element) {
   return element.type === 'ocbpmn:connection';
 }
+
+/*
+export function addocbpmnElements(ocbpmnElements) {
+  if (!isArray(ocbpmnElements)) {
+    throw new Error('argument must be an array');
+  }
+  
+  var shapes = [],
+    connections = [];
+  
+  ocbpmnElements.forEach(function(ocbpmnElement) {
+    if (isocbpmnConnection(ocbpmnElement)) {
+      connections.push(ocbpmnElement);
+    } else {
+      shapes.push(ocbpmnElement);
+    }
+  });
+  
+  var canvas = this.get('canvas');
+  var elementFactory = this.get('elementFactory');
+  var elementRegistry = this.get('elementRegistry');
+  
+  shapes.forEach(function(ocbpmnElement) {
+    var ocbpmnAttrs = assign({ businessObject: ocbpmnElement }, ocbpmnElement);
+    var ocbpmnShape = elementFactory.create('shape', ocbpmnAttrs);
+    canvas.addShape(ocbpmnShape);
+  });
+  
+  connections.forEach(function(ocbpmnElement) {
+    var ocbpmnAttrs = assign({ businessObject: ocbpmnElement }, ocbpmnElement);
+    var sourceElement = elementRegistry.get(ocbpmnElement.source);
+    var targetElement = elementRegistry.get(ocbpmnElement.target);
+    if (!sourceElement || !targetElement) {
+      console.error('Source or target element not found:', ocbpmnElement);
+      return;
+    }
+    var connection = elementFactory.create('connection', assign(ocbpmnAttrs, {
+      source: sourceElement,
+      target: targetElement
+    }), sourceElement.parent);
+    canvas.addConnection(connection);
+  });
+}
+
+ */

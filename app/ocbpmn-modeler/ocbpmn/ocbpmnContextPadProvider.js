@@ -98,7 +98,7 @@ export default function ocbpmnContextPadProvider(injector, connect, translate, o
       } else {
         ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
       }
-      console.log('OCBPMN CONTEXT PAD: Intent set to', ocbpmnConnectionIntent.getIntent());
+      console.log('OCBPMN CONTEXT PAD: Intent set to', ocbpmnConnectionIntent.getIntent(), 'for event:', event, 'and element:', element);
       connect.start(event, element, autoActivate);
     }
 

@@ -98,8 +98,8 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
   
 
   // Listen for shape move (to update connections when source/target moves)
-  eventBus.on('commandStack.shape.move.preExecute', function(e) {
-    console.log("OCBPMN UPDATER: commandStack.shape.move.preExecute event fired", e);
+  eventBus.on('commandStack.shape.move.postExecute', function(e) {
+    console.log("OCBPMN UPDATER: commandStack.shape.move.postExecute event fired", e);
     if (e.defaultPrevented) return;
     const shape = e.context.shape;
     if (shape) {
@@ -157,7 +157,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         businessObject = shape && shape.businessObject;
 
     if (!shape || !businessObject || !isocbpmn(shape)) {
-      console.log('OCBPMN UPDATER: Skipping updateocbpmnElement - invalid shape or businessObject');
+      //console.log('OCBPMN UPDATER: Skipping updateocbpmnElement - invalid shape or businessObject');
       return;
     }
 
@@ -187,7 +187,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         assign(businessObject, {
           originalLabel: businessObject.name
         });
-        console.log("OCBPMN UPDATER: Storing original label for element:", businessObject.originalLabel);
+        //console.log("OCBPMN UPDATER: Storing original label for element:", businessObject.originalLabel);
       }
     }
     
@@ -217,11 +217,16 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
   function updateStackedConnections(connection, event) {
     // Check if event was prevented
     if (event && event.defaultPrevented) {
-      console.log("OCBPMN UPDATER: Event was prevented, skipping updateStackedConnections");
+      //console.log("OCBPMN UPDATER: Event was prevented, skipping updateStackedConnections");
+      return;
+    }
+    
+    if (!connection || !elementRegistry.get(connection.id)) {
+      //connection was deleted, skip update
       return;
     }
 
-    console.log("OCBPMN UPDATER: updateStackedConnections called for connection:", connection);
+    //console.log("OCBPMN UPDATER: updateStackedConnections called for connection:", connection);
     //const source = connection.source;
     //const target = connection.target;
     //when reconnect.. delete event called... source and target null. needed for all deletion or can i edit this ?
@@ -239,7 +244,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
       e.target.id === target.id
     ).sort((a, b) => (a.id || '').localeCompare(b.id || ''));
 
-    console.log("OCBPMN UPDATER: updateStackedConnections all stacked arcs array allConnections:", allConnections);
+    console.log("OCBPMN UPDATER: updateStackedConnections all stacked arcs array allConnections:", allConnections, "for event:", event);
     //console.log("connection names:", allConnections.map(c => c.businessObject.name));
 /*
     if (allConnections) {
@@ -287,7 +292,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
       const validNames = allConnections
         .map(c => {
           const name = c.businessObject.name || '';
-          console.log(`Connection ${c.id} name:`, name);
+          //console.log(`Connection ${c.id} name:`, name);
           return name;
         })
         .filter(name => name && name.trim() !== '');
@@ -313,7 +318,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         if (index === 0) {
           // First connection gets combined label as visualLabel only
           const finalCombinedLabel = validNames.join('x');
-          console.log("First connection combined label:", finalCombinedLabel);
+          //console.log("First connection combined label:", finalCombinedLabel);
 
           // Set visualLabel to combined label
           connBusinessObject.visualLabel = finalCombinedLabel;
@@ -331,7 +336,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
           //eventBus.fire('element.updateLabel', { element: conn });
           eventBus.fire('element.updateVisuals', { element: conn });
         }
-        console.log("OCBPMN UPDATER: elment after redraw", conn);
+        //console.log("OCBPMN UPDATER: elment after redraw", conn);
       });
     }
     else if (allConnections.length === 1) {
@@ -346,7 +351,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         eventBus.fire('element.changed', {element: singleOcbpmnConnection});
         //eventBus.fire('element.updateLabel', {element: singleOcbpmnConnection});
         eventBus.fire('element.updateVisuals', {element: singleOcbpmnConnection});
-        console.log("OCBPMN UPDATER: elment after redraw", singleOcbpmnConnection);
+        //console.log("OCBPMN UPDATER: elment after redraw", singleOcbpmnConnection);
       }
     }
   }
@@ -360,11 +365,11 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         e.source && e.target &&
         e.target?.id === connection.source?.id
         );
-    console.log("allPrevConnections:", allPrevConnections, "of connection", connection);
+    //console.log("allPrevConnections:", allPrevConnections, "of connection", connection);
     
     // Update new connections (without a set name) with customColors of startobject or related previous connections
     if (!connection.businessObject.name) {
-      console.log("OCBPMN UPDATER new connection setting colors for connection", connection);
+      //console.log("OCBPMN UPDATER new connection setting colors for connection", connection);
       // If multiple previous ocbpmn connections exist, the last one will set the color (good? idk)
       if (allPrevConnections.length > 0) {
       
@@ -406,7 +411,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
                 originalLabel: prevCon.businessObject.originalLabel
               });
               eventBus.fire('element.changed', {element: connection.target});
-              console.log("OCBPMN UPDATER: ENDARC Setting visualLabel to empty string for endobject connection:", connection);
+              //console.log("OCBPMN UPDATER: ENDARC Setting visualLabel to empty string for endobject connection:", connection);
             }
             // Fire event to trigger immediate label update
             eventBus.fire('element.changed', {element: connection});
@@ -416,7 +421,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         // First connection on the path, set customColors and name from startobject
         const sourceObj = connection.source;
         const sourceObjBusinessObject = sourceObj.businessObject;
-        console.log("OCBPMN UPDATER: updateRelatedConnections: connection.source is a startobject, setting customColors and name:", connection);
+        //console.log("OCBPMN UPDATER: updateRelatedConnections: connection.source is a startobject, setting customColors and name:", connection);
         assign(connection.businessObject, {
           customColors: sourceObj.customColors || sourceObjBusinessObject.customColors || COLOR_OCBPMN_DEFAULT,
           name: sourceObjBusinessObject.name || '',
@@ -425,17 +430,12 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         });
         //console.log("OCBPMN UPDATER: updateRelatedConnections: connection.businessObject after updates:", connection.businessObject);
       }
-      console.log("OCBPMN UPDATER: updateRelatedConnections connection.businessObject after updates:", connection.businessObject);
+      //console.log("OCBPMN UPDATER: updateRelatedConnections connection.businessObject after updates:", connection.businessObject);
       getObjectFlowPathConnections(connection);
     }
   }
 
   this.updateocbpmnConnection = function(e) {
-    // Check if event was prevented
-    if (e.defaultPrevented) {
-      console.log("OCBPMN UPDATER: Event was prevented, skipping updateocbpmnConnection");
-      return;
-    }
 
     console.log('OCBPMN UPDATER: updateocbpmnConnection called', e);
     var context = e.context,
@@ -444,6 +444,12 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         target = connection.target,
         businessObject = connection.businessObject;
         //originalType = context.originalType;
+    
+    if (!connection || !elementRegistry.get(connection.id)) {
+      //connection was deleted, skip update
+      console.log("OCBPMN UPDATER: Skipping updateocbpmnConnection - connection was deleted or not found in registry");
+      return;
+    }
 
     var parent = connection.parent;
 

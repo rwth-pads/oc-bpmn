@@ -6,6 +6,12 @@ import ocbpmnModeler from './ocbpmn-modeler';
 import ExtendedColorPickerModule from './ExtendedColorPickerModule';
 import OcbpmnDirectEditingProvider from './OcbpmnDirectEditingProvider';
 import ChangeColor from './ChangeColor';
+import Modeler from 'bpmn-js/lib/Modeler';
+import ocbpmnModule from './ocbpmn-modeler/ocbpmn';
+import { assign } from 'min-dash';
+import ocbpmnElementFactory from './ocbpmn-modeler/ocbpmn/ocbpmnElementFactory';
+
+// import { addocbpmnElements } from './ocbpmn-modeler';
 
 var modeler = new ocbpmnModeler({
   container: '#canvas',
@@ -13,15 +19,97 @@ var modeler = new ocbpmnModeler({
     bindTo: document
   },
   additionalModules: [
+    ocbpmnModule,
+    ExtendedColorPickerModule,
+    OcbpmnDirectEditingProvider
+  ]
+});
+
+
+window.bpmnjs = modeler; // assign to window first!
+
+const eventBus = modeler.get('eventBus');
+const modeling = modeler.get('modeling');
+const ocbpmnConnectionIntent = modeler.get('ocbpmnConnectionIntent');
+
+// Handling reconnection of OCBPMN connections by replacing the wrongly created default BPMN connections with a new OCBPMN connection
+eventBus.on('commandStack.connection.create.postExecuted', function(event) {
+  const context = event.context;
+  const connection = context.connection;
+
+  if ((connection.type === 'bpmn:SequenceFlow' || connection.type === 'bpmn:MessageFlow') &&
+    ocbpmnConnectionIntent.getIntent &&
+    ocbpmnConnectionIntent.getIntent() === 'ocbpmn:connection') {
+
+    const source = context.source;
+    const target = context.target;
+
+    if (source && target) {
+
+      const newOcbpmnCon = {
+        type: 'ocbpmn:connection',
+        source: source,
+        target: target
+      };
+
+      // Create a new ocbpmn connection after the SequenceFlow is falsely created
+      const newCon = modeling.createConnection(source, target, newOcbpmnCon, source.parent);
+      console.log('Created new ocbpmn:connection', newCon, 'with source:', source, 'and target:', target);
+
+      // Name SequenceFlow with the new ocbpmn connection ID to delete it later
+      assign(connection.businessObject, {
+        name: newCon.id
+      });
+
+      console.log('Replaced BPMN SequenceFlow', connection, 'with ocbpmn:connection ',newOcbpmnCon, ' and modeling is:', modeling);
+    } else {
+      console.log('Failed to create ocbpmn:connection and replace SF, source or target is missing:', source, target);
+    }
+  }
+});
+
+// Delete the BPMN connection after reconnection to replace it with the new ocbpmn connection
+eventBus.on('commandStack.connection.reconnect.postExecuted', function(event) {
+  const context = event.context;
+  const connection = context.connection;
+
+  if ((connection.type === 'bpmn:SequenceFlow' || connection.type === 'bpmn:MessageFlow') &&
+    connection.businessObject && connection.businessObject.name) {
+    const elementRegistry = modeler.get('elementRegistry');
+    const getcopiedSequenceFlow = elementRegistry.get(connection.businessObject.name);
+    if (getcopiedSequenceFlow) {
+      console.log('Reconnected BPMN SequenceFlow', connection, 'with name:', connection.businessObject.name, 'and get:', getcopiedSequenceFlow);
+      modeling.removeConnection(connection);
+    }
+  }
+});
+
+// Now patch the handler
+// window.bpmnjs.get('commandStack')._handlerMap['connection.reconnect'] = new ocbpmnReconnectionHandler(
+// window.bpmnjs.get('modeling'),
+// window.bpmnjs.get('eventBus')
+// );
+
+/* //temp test
+var modeler = new ocbpmnModeler({
+  container: '#canvas',
+  keyboard: {
+    bindTo: document
+  },
+  additionalModules: [
+    ocbpmnModule,
     ExtendedColorPickerModule,
     OcbpmnDirectEditingProvider
     // ChangeColor is not included here as an additional module
   ]
 });
 
+ */
+
 modeler.importXML(pizzaDiagram).then(() => {
   modeler.get('canvas').zoom('fit-viewport');
 
+  // Only call addocbpmnElements after importXML resolves!
   modeler.addocbpmnElements(ocbpmnElements);
 }).catch(err => {
   console.error('something went wrong:', err);

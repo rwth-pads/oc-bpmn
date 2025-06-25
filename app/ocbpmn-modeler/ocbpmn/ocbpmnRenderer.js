@@ -678,7 +678,13 @@ export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry
 
 
     ocbpmnRenderer.prototype.canRender = function (element) {
+        //console.log('ocbpmnRenderer canRender called for element:', element);
+      if (element) {
         return /^ocbpmn:/.test(element.type);
+      } else {
+        console.log('ocbpmnRenderer canRender called with undefined element');
+        return false;
+      }
     };
 
     ocbpmnRenderer.prototype.drawShape = function (p, element) {

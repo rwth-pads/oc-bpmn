@@ -6,6 +6,7 @@ import ocbpmnRenderer from './ocbpmnRenderer';
 import ocbpmnRules from './ocbpmnRules';
 import ocbpmnUpdater from './ocbpmnUpdater';
 import OcbpmnConnectionIntent from './ocbpmnConnectionIntent';
+// import ocbpmnReconnectionHandler from './ocbpmnReconnectionHandler';
 
 export default {
   __init__: [
@@ -24,5 +25,8 @@ export default {
   ocbpmnUpdater: [ 'type', ocbpmnUpdater ],
   elementFactory: [ 'type', ocbpmnElementFactory ],
   paletteProvider: [ 'type', ocbpmnPalette ],
-  ocbpmnConnectionIntent: [ 'type', OcbpmnConnectionIntent ]
+  ocbpmnConnectionIntent: [ 'type', OcbpmnConnectionIntent ],
+  // commandHandlers: { 'connection.reconnect': [ 'type', ocbpmnReconnectionHandler ] }
 };
+
+// console.log("ocbpmnModule loaded, commandHandlers:", module.exports?.commandHandlers || "no module.exports");
