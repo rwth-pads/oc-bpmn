@@ -251,7 +251,9 @@ ocbpmnRules.prototype.init = function() {
        // return false; // Prevent default reconnect behavior, we will handle it manually
       //}
     } else {
-      // If canConnect returns false, a BPMN connection is reconnected and we return undefined to allow default behavior;
+      console.log("OCBPMN RULES: canConnect returned false for reconnect, preventing reconnection");
+      // If canConnect returns false, a BPMN connection is reconnected and we return undefined to allow default behavior
+      self._ocbpmnConnectionIntent.clearIntent();
       return undefined;
     }
     
