@@ -242,7 +242,7 @@ ocbpmnRules.prototype.init = function() {
       // Attempt to reconnect an ocbpmn connection
      // if (source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
       //  target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject') {
-        
+        self._ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
         return canCon; // Simply return the ocbpmn connection type if source or target is ocbpmn
       //}
       //else {
