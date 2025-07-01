@@ -1,6 +1,7 @@
 /* eslint-env browser */
 
 import pizzaDiagram from '../resources/pizza-collaboration.bpmn';
+import orderDiagram from '../resources/simpleorderprocess.bpmn';
 import ocbpmnElements from './ocbpmn-elements.json';
 import ocbpmnModeler from './ocbpmn-modeler';
 import ExtendedColorPickerModule from './ExtendedColorPickerModule';
@@ -9,6 +10,7 @@ import ChangeColor from './ChangeColor';
 import Modeler from 'bpmn-js/lib/Modeler';
 import ocbpmnModule from './ocbpmn-modeler/ocbpmn';
 import { assign } from 'min-dash';
+import { createObjectTypeMenu } from './ObjectTypeMenu';
 import ocbpmnElementFactory from './ocbpmn-modeler/ocbpmn/ocbpmnElementFactory';
 
 // import { addocbpmnElements } from './ocbpmn-modeler';
@@ -31,6 +33,17 @@ window.bpmnjs = modeler; // assign to window first!
 const eventBus = modeler.get('eventBus');
 const modeling = modeler.get('modeling');
 const ocbpmnConnectionIntent = modeler.get('ocbpmnConnectionIntent');
+
+eventBus.on('element.changed', function(event) {
+  const startobj = event.element;
+  const startobjColor = startobj.businessObject.customColors;
+  const startobjName = startobj.businessObject.name;
+  if (startobj && startobj.type === 'ocbpmn:startobject' && startobjName) {
+    createObjectTypeMenu();
+  }
+});
+
+createObjectTypeMenu();
 
 // Handling reconnection of OCBPMN connections by replacing the wrongly created default BPMN connections with a new OCBPMN connection
 eventBus.on('commandStack.connection.create.postExecuted', function(event) {
@@ -106,7 +119,7 @@ var modeler = new ocbpmnModeler({
 
  */
 
-modeler.importXML(pizzaDiagram).then(() => {
+modeler.importXML(orderDiagram).then(() => {
   modeler.get('canvas').zoom('fit-viewport');
 
   // Only call addocbpmnElements after importXML resolves!

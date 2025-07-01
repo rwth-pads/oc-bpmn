@@ -65,17 +65,18 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
 
   // add icons to palette and make them functional
   assign(actions, {
-    'ocbpmn-hexagon': createAction(
-      'ocbpmn:hexagon', 'ocbpmn', 'icon-ocbpmn-hexagon'
+    //'ocbpmn-hexagon': createAction(
+      //'ocbpmn:hexagon', 'ocbpmn', 'icon-ocbpmn-hexagon'
+    //),
+    //'ocbpmn-join': createAction(
+      //'ocbpmn:join', 'ocbpmn', 'icon-ocbpmn-join'
+    //),
+    //createAction(type,group,className,title,options)
+    'ocbpmn-oval': createAction('ocbpmn:startobject', 'ocbpmn', 'icon-ocbpmn-oval', 'Create Object Type'
     ),
-    'ocbpmn-join': createAction(
-      'ocbpmn:join', 'ocbpmn', 'icon-ocbpmn-join'
+    'ocbpmn-intermediateoval': createAction('ocbpmn:intermediateobject', 'ocbpmn', 'icon-ocbpmn-intermediateoval', 'Create Intermediate Node of Object Type'
     ),
-    'ocbpmn-oval': createAction('ocbpmn:startobject', 'ocbpmn', 'icon-ocbpmn-oval'
-    ),
-    'ocbpmn-intermediateoval': createAction('ocbpmn:intermediateobject', 'ocbpmn', 'icon-ocbpmn-intermediateoval'
-    ),
-    'ocbpmn-endoval': createAction('ocbpmn:endobject', 'ocbpmn', 'icon-ocbpmn-endoval'
+    'ocbpmn-endoval': createAction('ocbpmn:endobject', 'ocbpmn', 'icon-ocbpmn-endoval', 'Create End Node of Object Type'
     ),
     'ocbpmn-separator': {
       group: 'ocbpmn',
