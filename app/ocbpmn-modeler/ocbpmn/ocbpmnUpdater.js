@@ -155,6 +155,8 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     console.log('OCPMN UPDATER: updateocbpmnElement called', e);
     var shape = (e.context && e.context.shape) || e.element,
         businessObject = shape && shape.businessObject;
+    
+    console.log("OCBPMN UPDATER: updateocbpmnElement: shape:", shape, " and businessObject:", businessObject);
 
     if (!shape || !businessObject || !isocbpmn(shape)) {
       //console.log('OCBPMN UPDATER: Skipping updateocbpmnElement - invalid shape or businessObject');
@@ -362,27 +364,75 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     // All previous connections on the same path (connection.source is the target of the previous connections)
     const allPrevConnections = elementRegistry.filter(e =>
         e.type === 'ocbpmn:connection' &&
-        e.source && e.target &&
-        e.target?.id === connection.source?.id
+        e.source && e.target && connection.source &&
+        e.target.id === connection.source.id
         );
-    //console.log("allPrevConnections:", allPrevConnections, "of connection", connection);
+    console.log("allPrevConnections:", allPrevConnections, "of connection", connection);
     
     // Update new connections (without a set name) with customColors of startobject or related previous connections
     if (!connection.businessObject.name) {
       //console.log("OCBPMN UPDATER new connection setting colors for connection", connection);
       // If multiple previous ocbpmn connections exist, the last one will set the color (good? idk)
       if (allPrevConnections.length > 0) {
-      
-        allPrevConnections.forEach(prevCon => {
+        
+        const recentPrevCon = allPrevConnections[allPrevConnections.length - 1];
+        console.log("OCBPMN UPDATER: updating new connection", connection.id,
+          "with the name and color of the most recent previous connection", recentPrevCon);
+        const prevBO = recentPrevCon.businessObject;
+          
+          // Set color of connection to previous connection's custom colors
+          if (prevBO.customColors) {
+            console.log("OCBPMN UPDATER: coloring new connection", connection, "with target", connection.target);
+            
+            assign(connection.businessObject, {
+              customColors: prevBO.customColors
+            });
+            
+            if (connection.target && connection.target.type && connection.target.type === 'ocbpmn:intermediateobject' || connection.target.type === 'ocbpmn:endobject') {
+              assign(connection.target.businessObject, {
+                customColors: prevBO.customColors
+              });
+              console.log("OCBPMN UPDATER: shape changed connection.target", connection.target);
+              eventBus.fire('element.changed', { element: connection.target });
+            }
+          }
+          
+          // Name connection
+          if (prevBO.name) {
+            console.log("OCBPMN UPDATER: naming new connection", connection, "with target", connection.target);
+            assign(connection.businessObject, {
+              name: prevBO.name,
+              originalLabel: prevBO.originalLabel || ''
+            });
+            
+            if (connection.target && connection.target.type && connection.target.type === 'ocbpmn:intermediateobject' || connection.target.type === 'ocbpmn:endobject') {
+              assign(connection.target.businessObject, {
+                name: prevBO.name,
+                originalLabel: prevBO.originalLabel
+              });
+              
+              if (connection.target.type === 'ocbpmn:endobject'){
+                assign(connection.businessObject, {
+                  visualLabel: ''
+                });
+              }
+              eventBus.fire('element.changed', { element: connection.target });
+            }
+          }
+        
+        
+          /*
           if (prevCon.businessObject.customColors) {
             // Update the connection's businessObject with the customColors from the source
             assign(connection.businessObject, {
               customColors: prevCon.businessObject.customColors
             });
-            if (connection.target.type === 'ocbpmn:endobject') {
+            // Update intermediate and end objects in the path with the same customColors
+            if (connection.target.type === 'ocbpmn:endobject' || connection.target.type === 'ocbpmn:intermediateobject') {
               assign(connection.target.businessObject, {
               customColors: prevCon.businessObject.customColors
               });
+              eventBus.fire('element.changed', {element: connection.target});
             }
             // Fire event to trigger immediate color update
             eventBus.fire('element.changed', {element: connection});
@@ -402,21 +452,27 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
               originalLabel: prevCon.businessObject.originalLabel
             });
             //console.log("OCBPMN UPDATER: ENDARC Updating connection name for:", connection, "with target.type:", connection.target.type);
-            if (connection.target.type === 'ocbpmn:endobject') {
-              assign(connection.businessObject, {
-                visualLabel: ""
-              });
+            if (connection.target.type === 'ocbpmn:endobject' || connection.target.type === 'ocbpmn:intermediateobject') {
               assign(connection.target.businessObject, {
                 name: prevCon.businessObject.name,
                 originalLabel: prevCon.businessObject.originalLabel
               });
+              if (connection.target.type === 'ocbpmn:endobject') {
+                assign(connection.businessObject, {
+                  visualLabel: ""
+                });
+              }
+              console.log("OCBPMN UPDATER: target=intermediateobject or endobject, setting name:", prevCon.businessObject.name, "and originalLabel:", prevCon.businessObject.originalLabel, "for connection:",)
               eventBus.fire('element.changed', {element: connection.target});
               //console.log("OCBPMN UPDATER: ENDARC Setting visualLabel to empty string for endobject connection:", connection);
             }
             // Fire event to trigger immediate label update
             eventBus.fire('element.changed', {element: connection});
           }
-        });
+          
+           */
+       
+        
       } else if (connection.source && connection.source.type === 'ocbpmn:startobject') {
         // First connection on the path, set customColors and name from startobject
         const sourceObj = connection.source;

@@ -258,6 +258,7 @@ export default function ChangeColor(modeler) {
             assign(connection.businessObject, {
               customColors: sourceColors,
               name: element.businessObject.name,
+              originalLabel: element.businessObject.originalLabel || '',
               visualLabel: ''
             });
           }
@@ -274,14 +275,16 @@ export default function ChangeColor(modeler) {
 
           // TODO: what to do with states in label ??? visuallabel vs name better diff
 
-          if (connection.target.type === 'ocbpmn:endobject') {
+          if (connection.target.type === 'ocbpmn:endobject' || connection.target.type === 'ocbpmn:intermediateobject') {
             assign(connection.target.businessObject, {
               customColors: sourceColors,
               name: element.businessObject.name
             });
-            assign(connection.businessObject, {
-              visualLabel: ''
-            });
+            if (connection.target.type === 'ocbpmn:endobject') {
+              assign(connection.target.businessObject, {
+                visualLabel: ''
+              });
+            }
             eventBus.fire('element.changed', { element: connection.target });
           }
 

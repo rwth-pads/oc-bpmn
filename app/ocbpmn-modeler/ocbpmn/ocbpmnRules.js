@@ -96,6 +96,8 @@ ocbpmnRules.prototype.init = function() {
    * @param {string} [eventType] - 'create' or 'reconnect' to differentiate context of hintsOrConnection.
    */
   function canConnect(source, target, connectionOrContext, eventType) {
+    // TODO: handle stacking of ocbpmn connections of the same obj type
+    
     if (eventType === 'reconnect') {
       // For reconnect, preserve the original connection type through the business object
       const connectionType = connectionOrContext.businessObject ? connectionOrContext.businessObject.type : connectionOrContext.type;
