@@ -12,7 +12,7 @@ import {
   remove as collectionRemove
 } from 'diagram-js/lib/util/Collections';
 
-import SelectedObjectTypeService from "../../SelectedObjectTypeService";
+import SelectedObjectTypeService from '../../SelectedObjectTypeService';
 
 const COLOR_OCBPMN_DEFAULTSTROKE = '#0048FF'; // Default stroke color for ocbpmn connections
 const COLOR_OCBPMN_DEFAULT = {
@@ -404,8 +404,10 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     const allPrevConnections = elementRegistry.filter(e =>
       e.type === 'ocbpmn:connection' &&
         e.source && e.target && connection.source &&
-        e.target.id === connection.source.id
+        e.target.id === connection.source.id &&
+        e.target.type !== 'ocbpmn:startobject'
     );
+    // TODO deal with ocbpmn:endobject connections ??
     const selectedObjectType = SelectedObjectTypeService.getSelected();
     console.log('allPrevConnections:', allPrevConnections, 'of connection', connection, 'and selected object type:', selectedObjectType);
 
@@ -456,6 +458,9 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
               assign(connection.businessObject, {
                 visualLabel: ''
               });
+
+              // Finished object flow path, clear selected object type
+              SelectedObjectTypeService.clear();
             }
             eventBus.fire('element.changed', { element: connection.target });
           }

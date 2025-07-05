@@ -12,6 +12,7 @@ import {
 
 import RuleProvider from 'diagram-js/lib/features/rules/RuleProvider';
 import {isAny} from "bpmn-js/lib/features/modeling/util/ModelingUtil";
+import SelectedObjectTypeService from "../../SelectedObjectTypeService";
 
 var HIGH_PRIORITY = 1500;
 var HIGHEST_PRIORITY = 2000;  // Higher than BPMN's default priority
@@ -108,7 +109,7 @@ ocbpmnRules.prototype.init = function() {
         if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
                 source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:ParallelGateway'
                 || source.type === 'bpmn:IntermediateThrowEvent') &&
-            (target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
+            (target.type === 'ocbpmn:startobject' || target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
                 target.type === 'bpmn:Task' || target.type === 'bpmn:ExclusiveGateway' || target.type === 'bpmn:ParallelGateway'
                 || target.type === 'bpmn:IntermediateThrowEvent')) {
           // Return the original connection type
@@ -127,7 +128,7 @@ ocbpmnRules.prototype.init = function() {
         if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
                 source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:ParallelGateway'
                 || source.type === 'bpmn:IntermediateThrowEvent') &&
-            (target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
+            (target.type === 'ocbpmn:startobject' || target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
                 target.type === 'bpmn:Task' || target.type === 'bpmn:ExclusiveGateway' || target.type === 'bpmn:ParallelGateway'
                 || target.type === 'bpmn:IntermediateThrowEvent')) {
           return { type: 'ocbpmn:connection' };
@@ -241,17 +242,23 @@ ocbpmnRules.prototype.init = function() {
     const canCon = canConnect(source, target, connection, 'reconnect');
     
     if (canCon) {
-      // Attempt to reconnect an ocbpmn connection
-     // if (source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
-      //  target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject') {
+      
+        // Save connection type intent (ocbpmn:connection) to the intent service
         self._ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
+        // Save the connection's object type/visuals
+        if (connection.businessObject && connection.businessObject.name || connection.businessObject.customColors) {
+          if (SelectedObjectTypeService.getSelected()) {
+            SelectedObjectTypeService.clear();
+          }
+          SelectedObjectTypeService.setSelected({
+            name: connection.businessObject.name,
+            customColors: connection.businessObject.customColors,
+            originalLabel: connection.businessObject.originalLabel,
+            visualLabel: connection.businessObject.visualLabel
+          });
+        }
         return canCon; // Simply return the ocbpmn connection type if source or target is ocbpmn
-      //}
-      //else {
-        // Attempting to reconnect an implicit ocbpmn connection (e.g. between BPMN Tasks or Gateways)
-        // Reconnect connection ourselves to ensure it remains an ocbpmn connection
-       // return false; // Prevent default reconnect behavior, we will handle it manually
-      //}
+      
     } else {
       console.log("OCBPMN RULES: canConnect returned false for reconnect, preventing reconnection");
       // If canConnect returns false, a BPMN connection is reconnected and we return undefined to allow default behavior

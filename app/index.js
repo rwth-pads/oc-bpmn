@@ -12,6 +12,7 @@ import ocbpmnModule from './ocbpmn-modeler/ocbpmn';
 import { assign } from 'min-dash';
 import { createObjectTypeMenu } from './ObjectTypeMenu';
 import ocbpmnElementFactory from './ocbpmn-modeler/ocbpmn/ocbpmnElementFactory';
+import SelectedObjectTypeService from "./SelectedObjectTypeService";
 
 // import { addocbpmnElements } from './ocbpmn-modeler';
 
@@ -94,6 +95,8 @@ eventBus.on('commandStack.connection.reconnect.postExecuted', function(event) {
       console.log('Reconnected BPMN SequenceFlow', connection, 'with name:', connection.businessObject.name, 'and get:', getcopiedSequenceFlow);
       modeling.removeConnection(connection);
     }
+    // Clear the set object type after reconnection
+    SelectedObjectTypeService.clear();
   }
 });
 
