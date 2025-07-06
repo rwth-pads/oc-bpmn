@@ -561,14 +561,18 @@ export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry
                 fill: element.businessObject?.customColors?.fill || COLOR_STROKEBLUE,
                 stroke: element.businessObject?.customColors?.stroke || COLOR_STROKEBLUE
             };
+            
+            const strokeDashStyle = element.businessObject?.hints?.parallelSequenceId ? '0, 0' : '0, 5'; // Use parallelSequenceId to determine if dashed line is needed
+            const markerStyle = element.businessObject?.hints?.parallelSequenceId;
+            //console.log("ocbpmnRenderer drawocbpmnConnection called with element:", element, "and customColor:", customColor, "and strokeDashStyle:", strokeDashStyle, "parallelSequenceId:", element.businessObject?.hints?.parallelSequenceId ? 'true' : 'false');
 
             // style for line
             var attrs = computeStyle({}, { // Pass empty object for baseAttrs if none
                 stroke: customColor.stroke,
                 strokeWidth: 2,
                 strokeLinecap: 'round',
-                strokeDasharray: '0, 5',
-                markerEnd: 'url(#ofEnd)'
+                strokeDasharray: strokeDashStyle || '0, 5',
+                markerEnd: markerStyle ? 'url(#ofParallelEnd)' : 'url(#ofEnd)'
             });
 
             // create the connection line
@@ -640,12 +644,42 @@ export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry
                     stroke: '#000000',
                     strokeLinecap: 'round',
                     strokeLinejoin: 'round',
-                    strokeWidth: 1.5,
+                    strokeWidth: 1.5
                 });
-
+                
                 svgAppend(marker, markerPath);
+                
                 svgAppend(defs, marker);
             }
+          
+          if (!defs.querySelector('#ofParallelEnd')) {
+            // marker svg elem
+            var marker = svgCreate('marker', {
+              id: 'ofParallelEnd',
+              viewBox: '0 0 20 20',
+              refX: 11,
+              refY: 10,
+              markerWidth: 10,
+              markerHeight: 10,
+              orient: 'auto'
+            });
+            
+            // create triangle path shape for marker
+            const markerPath = svgCreate("path");
+            svgAttr(markerPath, {
+              id: 'ofMarker-path',
+              d: 'M 1 5 L 11 10 L 1 15 Z', //triangle
+              fill: '#000000',
+              stroke: '#000000',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round',
+              strokeWidth: 1.5
+            });
+            
+            svgAppend(marker, markerPath);
+            
+            svgAppend(defs, marker);
+          }
 
             return connectionGfx; // Return the graphics element
         };

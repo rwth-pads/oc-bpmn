@@ -62,7 +62,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     }
   });
   
-  eventBus.on('shape.create', function (e) {
+  eventBus.on('shape.create', function(e) {
     const shape = e.element;
     const shapeType = shape.type || shape.businessObject.type;
     
@@ -90,11 +90,23 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     }
   });
 
-  eventBus.on('element.updateLabel', function(e) {
-    console.log('OCBPMN UPDATER: element.updateLabel event fired', e);
-    const element = e.element;
-    if (isocbpmn(element) && element.type === 'ocbpmn:connection') {
-      updateStackedConnections(element, e);
+  eventBus.on('commandStack.connection.delete.postExecute', function(e) {
+    console.log('OCBPMN UPDATER: connection.delete.postExe event fired', e);
+    const connection = e.context.connection;
+    if (isocbpmn(connection) && connection.type === 'ocbpmn:connection') {
+      const source = connection.businessObject.source;
+      const target = connection.businessObject.target;
+      console.log("updater: isocbpmn and source and target", source, target);
+      if (source && target) {
+        const stackedCon = elementRegistry.filter(con =>
+          con.type === 'ocbpmn:connection' && con.source.id === source && con.target.id === target
+        );
+        console.log("stackedCon:", stackedCon);
+        if (stackedCon && stackedCon.length > 0) {
+          console.log("ocbpmn updater element is ocbpmn at delete");
+          updateStackedConnections(stackedCon[0]);
+        }
+      }
     }
   });
 
@@ -240,6 +252,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
   // Helper function to update all connections with same source and target
   function updateStackedConnections(connection, event) {
+    console.log("OCBPMN UPDATER: updateStackedConnections called for connection:", connection, "with event:", event);
 
     // Check if event was prevented
     if (event && event.defaultPrevented) {
@@ -258,12 +271,20 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     // const source = connection.source;
     // const target = connection.target;
     // when reconnect.. delete event called... source and target null. needed for all deletion or can i edit this ?
-    const source = connection.source || elementRegistry.get(connection.businessObject.source);
-    const target = connection.target || elementRegistry.get(connection.businessObject.target);
+    const source = connection.source;
+    const target = connection.target;
+    //const conRegistry = elementRegistry.getGraphics(connection);
+   //const conPath = conRegistry.querySelector('path');
 
-    // console.log("OCBPMN UPDATER target:", target, "source:", source);
+    console.log("OCBPMN UPDATER elementreg target:", target, "source:", source, "connection:");
 
-    if (!source || !target) return;
+    if (!source || !target) {
+      const conBO = connection.businessObject;
+      if (conBO.source && conBO.target) {
+      
+      }
+      return;
+    }
 
     // Get all connections between the same source and target
     const allConnections = elementRegistry.filter(e =>
@@ -275,6 +296,16 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
     console.log('OCBPMN UPDATER: updateStackedConnections all stacked arcs array allConnections:', allConnections, 'for event:', event);
 
+    const parallelSequenceArr = elementRegistry.filter(sf =>
+      sf.type === 'bpmn:SequenceFlow' &&
+      sf.source && sf.target &&
+      sf.source.id === source.id &&
+      sf.target.id === target.id &&
+      sf.businessObject.ocbpmnReconnect !== true
+    );
+    const parallelSequence = parallelSequenceArr.length > 0 ? parallelSequenceArr[0] : null;
+     console.log("OCBPMN UPDATER parallelSequence:", parallelSequence, "parallelSequenceArr:", parallelSequenceArr);
+    
     // console.log("connection names:", allConnections.map(c => c.businessObject.name));
     /*
     if (allConnections) {
@@ -306,10 +337,11 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     }
 
  */
+    // Waypoints of stacked connections are based on the parallel sequence flow or the first connection's waypoints
+    const baseWaypoints = parallelSequence ? parallelSequence.waypoints : allConnections[0].waypoints;
+    console.log("OCBPMN UPDATER baseWaypoints:", baseWaypoints, "for allConnections:", allConnections);
     if (allConnections.length > 1) {
-      const Y_AXIS_STACK_OFFSET = 10;
-      const baseWaypoints = allConnections[0].waypoints;
-
+      const Y_AXIS_STACK_OFFSET = parallelSequence ? 2 : 10;
       // Store original labels if not already stored
       allConnections.forEach((conn, index) => {
         const connBusinessObject = conn.businessObject;
@@ -344,6 +376,10 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         assign(connBusinessObject, {
           waypoints: offsetWaypoints
         });
+        
+        if (parallelSequence) {
+          connBusinessObject.hints = { parallelSequenceId: parallelSequence.id };
+        }
 
         // Handle labels
         if (index === 0) {
@@ -383,8 +419,22 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
       if (singleOcbpmnConnection.target.type !== 'ocbpmn:endobject' && singleOcbpmnConnection.source.type !== 'ocbpmn:startobject') {
         const businessObject = singleOcbpmnConnection.businessObject;
-        businessObject.visualLabel = undefined;
-
+        
+        // Set waypoints (possibly of parallel sequence flow) and visualLabel to undefined
+        singleOcbpmnConnection.waypoints = baseWaypoints;
+        assign(businessObject, {
+          visualLabel: undefined,
+          waypoints: baseWaypoints
+        });
+        
+        if (parallelSequence) {
+          singleOcbpmnConnection.businessObject.hints = { parallelSequenceId: parallelSequence.id };
+         // conPath.style.setAttribute('stroke-dasharray', 'none');
+          //conPath.style.strokeDasharray = '0, 0';
+          //conPath.style.setProperty('stroke-dasharray', '0, 0');
+          //console.log("elementRegistry conPath.style after setting stroke-dasharray:", conPath.style.strokeDasharray, connection, singleOcbpmnConnection);
+          //conPath.style.'stroke-dasharray' = 'none';
+        }
         // Force a complete redraw of the connection
         eventBus.fire('element.changed', { element: singleOcbpmnConnection });
 
@@ -543,10 +593,9 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
           originalLabel: selectedObjectType.originalLabel
         });
       }
-
-      // console.log("OCBPMN UPDATER: updateRelatedConnections connection.businessObject after updates:", connection.businessObject);
-      getObjectFlowPathConnections(connection);
     }
+    // If connection already has a name, update all connections on the same path with the same name
+    getObjectFlowPathConnections(connection); // still has reconnected connections atp
   }
 
   this.updateocbpmnConnection = function(e) {
@@ -559,11 +608,12 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         businessObject = connection.businessObject;
 
     // originalType = context.originalType;
-
+    
+    var ocbpmnElements = bpmnjs._ocbpmnElements;
+    
     if (!connection || !elementRegistry.get(connection.id)) {
-
-      // connection was deleted, skip update
-      console.log('OCBPMN UPDATER: Skipping updateocbpmnConnection - connection was deleted or not found in registry');
+      console.log('OCBPMN UPDATER: Skipping updateocbpmnConnection - connection', connection,' was deleted or not found in registry', elementRegistry.get(connection.id));
+      //collectionRemove(ocbpmnElements, businessObject);
       return;
     }
 

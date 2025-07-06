@@ -66,8 +66,41 @@ eventBus.on('commandStack.connection.create.postExecuted', function(event) {
         target: target
       };
 
+      // Assign the ocbpmnReconnect flag to sequence flow to indicate it is being replaced
+      assign(connection.businessObject, {
+        ocbpmnReconnect: true
+      });
+
       // Create a new ocbpmn connection after the SequenceFlow is falsely created
       const newCon = modeling.createConnection(source, target, newOcbpmnCon, source.parent);
+      
+      // If reconnected connection was in a stack, update the stack
+      const sourceOut = source.outgoing.filter(con => con.type === 'ocbpmn:connection');
+      const targetIn = target.incoming.filter(con => con.type === 'ocbpmn:connection');
+      // Either source or target have been changed, meaning, if the reconnected connection was in a stack, then we update all other outgoing/incoming ocbpmn connections
+      if (sourceOut && sourceOut.length > 1) {
+        sourceOut.forEach(con => {
+          if (con.type === 'ocbpmn:connection') {
+            console.log("firing source out", con);
+            if (!con.source || !con.target) {
+              console.log("firing change for sourceOut after reconnect.... source or target null", con);
+              eventBus.fire('element.changed', {element: con});
+            }
+          }
+        });
+      }
+      if (targetIn && targetIn.length > 1) {
+        targetIn.forEach(con => {
+          if (con.type === 'ocbpmn:connection') {
+            console.log("firing target in", con);
+            if (!con.source || !con.target) {
+              console.log("firing change for targetIn after reconnect...aource or target null", con);
+              eventBus.fire('element.changed', {element: con});
+            }
+          }
+        });
+      }
+      eventBus.fire('element.changed', { element: newCon });
       console.log('Created new ocbpmn:connection', newCon, 'with source:', source, 'and target:', target);
 
       // Name SequenceFlow with the new ocbpmn connection ID to delete it later
@@ -92,6 +125,12 @@ eventBus.on('commandStack.connection.reconnect.postExecuted', function(event) {
     const elementRegistry = modeler.get('elementRegistry');
     const getcopiedSequenceFlow = elementRegistry.get(connection.businessObject.name);
     if (getcopiedSequenceFlow) {
+      const conSource = connection.source;
+      const conTarget = connection.target;
+      const conSourceOut = conSource.outgoing.filter(con => con.type === 'ocbpmn:connection');
+      const conTargetIn = conTarget.incoming.filter(con => con.type === 'ocbpmn:connection');
+      console.log("source of reconnected:", conSource, "target:", conTarget, "and outgoing of source:", conSourceOut, "and incoming of target", conTargetIn);
+      
       console.log('Reconnected BPMN SequenceFlow', connection, 'with name:', connection.businessObject.name, 'and get:', getcopiedSequenceFlow);
       modeling.removeConnection(connection);
     }

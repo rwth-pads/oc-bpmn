@@ -245,6 +245,7 @@ ocbpmnRules.prototype.init = function() {
       
         // Save connection type intent (ocbpmn:connection) to the intent service
         self._ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
+        //self._ocbpmnConnectionIntent.setIntent('ocbpmn:reconnect');
         // Save the connection's object type/visuals
         if (connection.businessObject && connection.businessObject.name || connection.businessObject.customColors) {
           if (SelectedObjectTypeService.getSelected()) {
