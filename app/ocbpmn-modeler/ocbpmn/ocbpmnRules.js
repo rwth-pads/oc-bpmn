@@ -74,6 +74,11 @@ ocbpmnRules.prototype.init = function() {
     self._ocbpmnConnectionIntent.clearIntent();
   });
   
+  this._eventBus.on('connect.end', function(event) {
+    console.log('OCBPMN RULES: connect.end... clearining intent', event);
+    self._ocbpmnConnectionIntent.clearIntent();
+  });
+  
   this._eventBus.on('commandStack.connection.reconnect.canExecute', function(event) {
     console.log("OCBPMN RULES: commandStack.connection.reconnect.canExecute event", event);
   });

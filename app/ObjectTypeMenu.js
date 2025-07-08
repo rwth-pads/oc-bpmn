@@ -22,7 +22,8 @@ export function createObjectTypeMenu() {
   // Get all startobjects
   const modeler = window.bpmnjs;
   const elementRegistry = modeler.get('elementRegistry');
-  const startObjects = elementRegistry.filter(e => e.type === 'ocbpmn:startobject' && e.businessObject.name);
+  const startObjects = elementRegistry.filter(e => e.type === 'ocbpmn:startobject' &&
+    e.businessObject.originalLabel && e.businessObject.name);
   
   if (startObjects.length === 0) {
     menu.innerHTML = '<em>No object types yet</em>';

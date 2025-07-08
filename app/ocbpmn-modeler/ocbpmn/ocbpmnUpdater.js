@@ -217,8 +217,8 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         e.businessObject.originalLabel === businessObject.name
       );
 
-      if (ocbpmnObjects.length > 0) {
-        alert("OCBPMN UPDATER: Element with name '" + businessObject.name + "' already exists in the diagram. Please use a different name.");
+      if (ocbpmnObjects.length > 0 && shape.type === 'ocbpmn:startobject') {
+        alert("Element with name '" + businessObject.name + "' already exists in the diagram. Please use a different name.");
       } else {
         assign(businessObject, {
           originalLabel: businessObject.name

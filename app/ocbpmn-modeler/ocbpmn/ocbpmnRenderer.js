@@ -571,12 +571,13 @@ export default function ocbpmnRenderer(eventBus, styles, canvas, elementRegistry
                 stroke: customColor.stroke,
                 strokeWidth: 2,
                 strokeLinecap: 'round',
+                strokeLinejoin: 'round',
                 strokeDasharray: strokeDashStyle || '0, 5',
                 markerEnd: markerStyle ? 'url(#ofParallelEnd)' : 'url(#ofEnd)'
             });
 
             // create the connection line
-            var connectionGfx = createLine(element.waypoints, attrs); // Renamed to avoid conflict
+            var connectionGfx = createLine(element.waypoints, attrs, 5); // Renamed to avoid conflict
             svgAppend(p, connectionGfx);
 
             // Add label to connection
