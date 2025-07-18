@@ -13,6 +13,7 @@ import {
 } from 'diagram-js/lib/util/Collections';
 
 import SelectedObjectTypeService from '../../SelectedObjectTypeService';
+import {getBounds, getRoundRectPath} from "bpmn-js/lib/draw/BpmnRenderUtil";
 
 const COLOR_OCBPMN_DEFAULTSTROKE = '#0048FF'; // Default stroke color for ocbpmn connections
 const COLOR_OCBPMN_DEFAULT = {
@@ -250,6 +251,76 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     return objectFlowPathConnections;
   }
 
+  function calculateParallelWaypoints(waypoints, offset) {
+    if (waypoints.length < 2) return waypoints;
+    const offsetSegments = [];
+    
+    // Step 1: compute offset segments for each pair
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const p1 = waypoints[i];
+      const p2 = waypoints[i + 1];
+      
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const len = Math.hypot(dx, dy);
+      
+      const offsetX = -dy / len * offset;
+      const offsetY = dx / len * offset;
+      
+      offsetSegments.push([
+        { x: p1.x + offsetX, y: p1.y + offsetY },
+        { x: p2.x + offsetX, y: p2.y + offsetY }
+      ]);
+    }
+    
+    // Step 2: merge the offset segments into a continuous line
+    const newWaypoints = [];
+    
+    newWaypoints.push(offsetSegments[0][0]); // first point
+    
+    for (let i = 0; i < offsetSegments.length - 1; i++) {
+      const segA = offsetSegments[i];
+      const segB = offsetSegments[i + 1];
+      
+      // Average the joint between segA and segB to make a smooth corner
+      const joint = {
+        x: (segA[1].x + segB[0].x) / 2,
+        y: (segA[1].y + segB[0].y) / 2
+      };
+      
+      newWaypoints.push(joint);
+    }
+    
+    newWaypoints.push(offsetSegments[offsetSegments.length - 1][1]); // last point
+    
+    return newWaypoints;
+  }
+
+  // Update connection's name and add an object status
+  this.updateConObjectStatus = function(connection, event) {
+    const connectionBO = connection.businessObject;
+    const connectionName = connectionBO.name;
+    const objectType = elementRegistry.filter(e => e.type === 'ocbpmn:startobject' &&
+        (connectionName.startsWith(e.businessObject.name + ' [') || connectionName.startsWith(e.businessObject.name + '['))
+      );
+    
+    if (objectType.length > 0) {
+      console.log("OCBPMN UPDATER: updateConnectionStatus found objectType:", objectType, "for connection:", connection);
+      const hasStatus = connectionName.includes(']');
+      if (hasStatus) {
+        connectionBO.status = connectionName.substring(connectionName.indexOf('[') + 1, connectionName.lastIndexOf(']'));
+      } else {
+        alert('Syntax error in connection:' + connectionName + '. Expected format for status labels: "ObjectTypeName [Status]".');
+      }
+      console.log("OCBPMN UPDATER: connectionBO.status set to:", connectionBO);
+    }
+    else if (connectionBO.status) {
+      // If no object type found but status exists, remove it
+      delete connectionBO.status;
+      console.log("OCBPMN UPDATER: No object type found for connection:", connection, "but status exists, removing it.");
+      
+    }
+  };
   // Helper function to update all connections with same source and target
   function updateStackedConnections(connection, event) {
     console.log("OCBPMN UPDATER: updateStackedConnections called for connection:", connection, "with event:", event);
@@ -267,14 +338,8 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
       return;
     }
 
-    // console.log("OCBPMN UPDATER: updateStackedConnections called for connection:", connection);
-    // const source = connection.source;
-    // const target = connection.target;
-    // when reconnect.. delete event called... source and target null. needed for all deletion or can i edit this ?
     const source = connection.source;
     const target = connection.target;
-    //const conRegistry = elementRegistry.getGraphics(connection);
-   //const conPath = conRegistry.querySelector('path');
 
     console.log("OCBPMN UPDATER elementreg target:", target, "source:", source, "connection:");
 
@@ -340,8 +405,11 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     // Waypoints of stacked connections are based on the parallel sequence flow or the first connection's waypoints
     const baseWaypoints = parallelSequence ? parallelSequence.waypoints : allConnections[0].waypoints;
     console.log("OCBPMN UPDATER baseWaypoints:", baseWaypoints, "for allConnections:", allConnections);
+    
     if (allConnections.length > 1) {
-      const Y_AXIS_STACK_OFFSET = parallelSequence ? 2 : 10;
+      
+      const PARALLEL_OFFSET = parallelSequence ? 2 : 10;
+      
       // Store original labels if not already stored
       allConnections.forEach((conn, index) => {
         const connBusinessObject = conn.businessObject;
@@ -353,34 +421,48 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
       // First, collect all valid names
       const validNames = allConnections
         .map(c => {
+          //const name = c.businessObject.status ? c.businessObject.name + ' [' + c.businessObject.status + ']' : c.businessObject.name;
           const name = c.businessObject.name || '';
-
           // console.log(`Connection ${c.id} name:`, name);
           return name;
         })
         .filter(name => name && name.trim() !== '');
 
-      // console.log("Valid names collected:", validNames);
+       console.log("Valid names collected:", validNames);
+      const sourceBounds = elementRegistry.filter(e => e.id === source.id);
+      console.log("source bounds", sourceBounds);
 
       // Update all connections with new waypoints and labels
       allConnections.forEach((conn, index) => {
-        const yOffset = index * Y_AXIS_STACK_OFFSET;
-        const offsetWaypoints = baseWaypoints.map(wp => ({
-          x: wp.x,
-          y: wp.y + yOffset
-        }));
+        const offset = index * PARALLEL_OFFSET;
+        
+        // const offsetWaypoints = baseWaypoints.map(wp => ({
+          // x: wp.x,
+          // y: wp.y + yOffset
+        // }));
+        
+        const offsetWaypoints = calculateParallelWaypoints(baseWaypoints, offset);
 
         // Update both the connection element and its business object
-        const connBusinessObject = conn.businessObject;
+        //const connBusinessObject = conn.businessObject;
         conn.waypoints = offsetWaypoints;
-        assign(connBusinessObject, {
+        assign(conn.businessObject, {
           waypoints: offsetWaypoints
         });
         
         if (parallelSequence) {
-          connBusinessObject.hints = { parallelSequenceId: parallelSequence.id };
+          conn.businessObject.hints = { parallelSequenceId: parallelSequence.id };
         }
-
+        
+        // Update docking points
+        const source = conn.source;
+        const target = conn.target;
+        //const dockingPoints = recalculateDockingPoints(conn, source, target);
+        
+        //conn.waypoints[0] = dockingPoints.source;
+        //conn.waypoints[conn.waypoints.length - 1] = dockingPoints.target;
+        
+        
         // Handle labels
         if (index === 0) {
 
@@ -390,7 +472,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
           // console.log("First connection combined label:", finalCombinedLabel);
 
           // Set visualLabel to combined label
-          connBusinessObject.visualLabel = finalCombinedLabel;
+          conn.businessObject.visualLabel = finalCombinedLabel;
 
           // Force a complete redraw of the connection
           eventBus.fire('element.changed', { element: conn });
@@ -400,7 +482,7 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         } else {
 
           // For stacked connections, set visualLabel to empty string to prevent name from showing
-          connBusinessObject.visualLabel = '';
+          conn.businessObject.visualLabel = '';
 
           // Force a complete redraw of the connection
           eventBus.fire('element.changed', { element: conn });
@@ -444,6 +526,23 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         // console.log("OCBPMN UPDATER: elment after redraw", singleOcbpmnConnection);
       }
     }
+  }
+  
+  function recalculateDockingPoints(connection, source, target) {
+    const sourceBounds = source.bounds || source;
+    const targetBounds = target.bounds || target;
+    
+    return {
+      source: {
+        x: sourceBounds.x - 5 + sourceBounds.width / 2,
+        y: sourceBounds.y + sourceBounds.height
+      },
+      //below and in the middle
+      target: {
+        x: targetBounds.x + 5 - targetBounds.width / 2,
+        y: targetBounds.y + targetBounds.height
+      }
+    };
   }
 
   // Add connection to the current object flow path (update customColors and name)
@@ -497,6 +596,10 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
             name: prevBO.name,
             originalLabel: prevBO.originalLabel || ''
           });
+          
+          if (prevBO.status) {
+            connection.businessObject.status = prevBO.status;
+          }
 
           if (connection.target && connection.target.type && connection.target.type === 'ocbpmn:intermediateobject' || connection.target.type === 'ocbpmn:endobject') {
             assign(connection.target.businessObject, {
@@ -609,12 +712,12 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
 
     // originalType = context.originalType;
     
-    var ocbpmnElements = bpmnjs._ocbpmnElements;
+    // var ocbpmnElements = bpmnjs._ocbpmnElements;
     
     if (!connection || !elementRegistry.get(connection.id)) {
-      console.log('OCBPMN UPDATER: Skipping updateocbpmnConnection - connection', connection,' was deleted or not found in registry', elementRegistry.get(connection.id));
+      console.log('OCBPMN UPDATER: Skipping updateocbpmnConnection - connection', connection,' was deleted or not found in registry', elementRegistry.get(connection.id), 'removed return (test)');
       //collectionRemove(ocbpmnElements, businessObject);
-      return;
+     // return;
     }
 
     var parent = connection.parent;

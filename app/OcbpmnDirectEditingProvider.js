@@ -112,6 +112,8 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus, ocbpmnUpdater) {
         element.type === 'ocbpmn:intermediateobject' ||
         element.type === 'ocbpmn:endobject' ||
         element.type === 'ocbpmn:connection') { // Added ocbpmn:connection
+      
+      
       element.businessObject.name = text;
       
       // For connections, update immediately
@@ -119,6 +121,7 @@ function OcbpmnDirectEditingProvider(directEditing, eventBus, ocbpmnUpdater) {
         // Force update of the element in the registry
         eventBus.fire('element.changed', { element: element });
         
+        ocbpmnUpdater.updateConObjectStatus(element);
         // Update stacked connections using the injected updater
         ocbpmnUpdater.updateStackedConnections(element);
       } else {

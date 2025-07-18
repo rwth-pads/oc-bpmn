@@ -50,11 +50,14 @@ createObjectTypeMenu();
 eventBus.on('commandStack.connection.create.postExecuted', function(event) {
   const context = event.context;
   const connection = context.connection;
+  const intent = ocbpmnConnectionIntent.getIntent();
 
   if ((connection.type === 'bpmn:SequenceFlow' || connection.type === 'bpmn:MessageFlow') &&
     ocbpmnConnectionIntent.getIntent &&
     ocbpmnConnectionIntent.getIntent() === 'ocbpmn:connection') {
-
+    
+    
+    console.log('index.js thinks this is a reconnect of', connection, ' and intent: ', ocbpmnConnectionIntent.getIntent(), intent);
     const source = context.source;
     const target = context.target;
 
@@ -73,40 +76,17 @@ eventBus.on('commandStack.connection.create.postExecuted', function(event) {
 
       // Create a new ocbpmn connection after the SequenceFlow is falsely created
       const newCon = modeling.createConnection(source, target, newOcbpmnCon, source.parent);
-      
-      // If reconnected connection was in a stack, update the stack
-      const sourceOut = source.outgoing.filter(con => con.type === 'ocbpmn:connection');
-      const targetIn = target.incoming.filter(con => con.type === 'ocbpmn:connection');
-      // Either source or target have been changed, meaning, if the reconnected connection was in a stack, then we update all other outgoing/incoming ocbpmn connections
-      if (sourceOut && sourceOut.length > 1) {
-        sourceOut.forEach(con => {
-          if (con.type === 'ocbpmn:connection') {
-            console.log("firing source out", con);
-            if (!con.source || !con.target) {
-              console.log("firing change for sourceOut after reconnect.... source or target null", con);
-              eventBus.fire('element.changed', {element: con});
-            }
-          }
-        });
-      }
-      if (targetIn && targetIn.length > 1) {
-        targetIn.forEach(con => {
-          if (con.type === 'ocbpmn:connection') {
-            console.log("firing target in", con);
-            if (!con.source || !con.target) {
-              console.log("firing change for targetIn after reconnect...aource or target null", con);
-              eventBus.fire('element.changed', {element: con});
-            }
-          }
-        });
-      }
-      eventBus.fire('element.changed', { element: newCon });
       console.log('Created new ocbpmn:connection', newCon, 'with source:', source, 'and target:', target);
 
       // Name SequenceFlow with the new ocbpmn connection ID to delete it later
       assign(connection.businessObject, {
         name: newCon.id
       });
+      
+      // Clear the set object type after reconnection
+      console.log("Clearing selected object type and connection intent post reconnection creation..was", SelectedObjectTypeService.getSelected(), ocbpmnConnectionIntent.getIntent());
+      SelectedObjectTypeService.clear();
+      ocbpmnConnectionIntent.clearIntent();
 
       console.log('Replaced BPMN SequenceFlow', connection, 'with ocbpmn:connection ',newOcbpmnCon, ' and modeling is:', modeling);
     } else {
@@ -125,17 +105,18 @@ eventBus.on('commandStack.connection.reconnect.postExecuted', function(event) {
     const elementRegistry = modeler.get('elementRegistry');
     const getcopiedSequenceFlow = elementRegistry.get(connection.businessObject.name);
     if (getcopiedSequenceFlow) {
-      const conSource = connection.source;
-      const conTarget = connection.target;
-      const conSourceOut = conSource.outgoing.filter(con => con.type === 'ocbpmn:connection');
-      const conTargetIn = conTarget.incoming.filter(con => con.type === 'ocbpmn:connection');
-      console.log("source of reconnected:", conSource, "target:", conTarget, "and outgoing of source:", conSourceOut, "and incoming of target", conTargetIn);
-      
       console.log('Reconnected BPMN SequenceFlow', connection, 'with name:', connection.businessObject.name, 'and get:', getcopiedSequenceFlow);
       modeling.removeConnection(connection);
     }
     // Clear the set object type after reconnection
+    console.log("Clearing selected object type post reconnection. was:", SelectedObjectTypeService.getSelected(), "intent was", ocbpmnConnectionIntent.getIntent());
     SelectedObjectTypeService.clear();
+  }
+  else if (connection.type === 'ocbpmn:connection' && ocbpmnConnectionIntent.getIntent) {
+    // Reconnection of ocbpmn:connections with source/target ocbpmn work normally and require the intent to be cleared
+    // Implicit ocbpmn reconnections already cleared intent before
+    console.log("clearing intent post reconnection. was:", ocbpmnConnectionIntent.getIntent());
+    ocbpmnConnectionIntent.clearIntent();
   }
 });
 

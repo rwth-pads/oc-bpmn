@@ -236,15 +236,16 @@ export default function ChangeColor(modeler) {
       // Sicherstellen, dass outgoing ein Array ist und Verbindungen enthält
       const outgoingCon = Array.isArray(element.outgoing) ? element.outgoing : [];
       const sourceColors = element.businessObject.customColors;
-      const sourceName = element.businessObject.name;
+      const sourceName = element.businessObject.name || '';
+      const sourceOgLabel = element.businessObject.originalLabel;
 
       // Find all related connection from object flow path (have the same name or the target is an endobject with the same name)
       const relatedConnections = elementRegistry.filter(e =>
         e.type === 'ocbpmn:connection' &&
         ((e.businessObject && e.businessObject.name === element.businessObject.name) ||
-          (e.target && e.target.type === 'ocbpmn:endobject' && e.target.businessObject && e.target.businessObject.name === element.businessObject.name) ||
-          (e.businessObject && e.businessObject.originalLabel && e.businessObject.originalLabel === element.businessObject.originalLabel) ||
-          (e.businessObject && e.businessObject.name && e.businessObject.name.startsWith(sourceName + ' '))
+          (e.target && e.target.type === 'ocbpmn:endobject' && e.target.businessObject && e.target.businessObject.name === sourceName) ||
+          (e.businessObject && e.businessObject.originalLabel && e.businessObject.originalLabel === sourceOgLabel) ||
+          (e.businessObject && e.businessObject.name && e.businessObject.name.includes(sourceName) && e.businessObject.name.includes('['))
         )
       );
       console.log('CHANGECOLOR: eventBus element.changed for ocbpmn:startobject:', element, 'and relatedConnections:', relatedConnections, 'event:', event);
@@ -257,8 +258,8 @@ export default function ChangeColor(modeler) {
           if (connection.type === 'ocbpmn:connection') {
             assign(connection.businessObject, {
               customColors: sourceColors,
-              name: element.businessObject.name,
-              originalLabel: element.businessObject.originalLabel || '',
+              name: connection.businessObject.status ? sourceName + ' [' + connection.businessObject.status + ']' : sourceName,
+              originalLabel: sourceOgLabel || '',
               visualLabel: ''
             });
           }
@@ -268,17 +269,13 @@ export default function ChangeColor(modeler) {
         relatedConnections.forEach(connection => {
           assign(connection.businessObject, {
             customColors: sourceColors,
-
-            // visualLabel: connection.businessObject.name,
-            name: element.businessObject.name
+            name: connection.businessObject.status ? sourceName + ' [' + connection.businessObject.status + ']' : sourceName // Keep obj state if it exists
           });
-
-          // TODO: what to do with states in label ??? visuallabel vs name better diff
 
           if (connection.target.type === 'ocbpmn:endobject' || connection.target.type === 'ocbpmn:intermediateobject') {
             assign(connection.target.businessObject, {
               customColors: sourceColors,
-              name: element.businessObject.name
+              name: connection.businessObject.status ? sourceName + ' [' + connection.businessObject.status + ']' : sourceName
             });
             if (connection.target.type === 'ocbpmn:endobject') {
               assign(connection.target.businessObject, {
