@@ -116,13 +116,17 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     console.log('OCBPMN UPDATER: commandStack.connection.reconnect.preExecute event fired', e);
     if (e.defaultPrevented) return;
     const connection = e.context.connection;
+    if (connection.businessObject.hints) {
+      // If the connection has hints, it might be a parallel sequence flow
+      console.log('OCBPMN UPDATER: connection has hints:', connection.businessObject.hints);
+    }
     console.log('OCBPMN UPDATER: connection being reconnected:', connection);
 
     // Store the original connection type in the context if it's an ocbpmn connection
     if (isocbpmn(connection)) {
-      e.context.originalType = 'ocbpmn:connection';
-      console.log('  storing originalType in context:', e.context);
-      updateStackedConnections(connection, e);
+      //e.context.originalType = 'ocbpmn:connection';
+      //console.log('  storing originalType in context:', e.context);
+      //updateStackedConnections(connection, e);
     }
   });
 

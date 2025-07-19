@@ -136,6 +136,10 @@ ocbpmnRules.prototype.init = function() {
             (target.type === 'ocbpmn:startobject' || target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
                 target.type === 'bpmn:Task' || target.type === 'bpmn:ExclusiveGateway' || target.type === 'bpmn:ParallelGateway'
                 || target.type === 'bpmn:IntermediateThrowEvent')) {
+          if (source.type === 'ocbpmn:startobject' && SelectedObjectTypeService.getSelected()){
+            // If we start a new object flow, clear the selected object type
+            SelectedObjectTypeService.clear();
+          }
           return { type: 'ocbpmn:connection' };
         }
         return false;
@@ -250,6 +254,12 @@ ocbpmnRules.prototype.init = function() {
       
         // Save connection type intent (ocbpmn:connection) to the intent service
         self._ocbpmnConnectionIntent.setIntent('ocbpmn:connection');
+        
+        // Delete hints from reconnected connection (hints about parallel sequence flows)
+        if (connection.businessObject.hints) {
+          delete connection.businessObject.hints;
+        }
+        
         //self._ocbpmnConnectionIntent.setIntent('ocbpmn:reconnect');
         // Save the connection's object type/visuals
         if (connection.businessObject && connection.businessObject.name || connection.businessObject.customColors) {
