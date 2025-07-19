@@ -56,7 +56,6 @@ eventBus.on('commandStack.connection.create.postExecuted', function(event) {
     ocbpmnConnectionIntent.getIntent &&
     ocbpmnConnectionIntent.getIntent() === 'ocbpmn:connection') {
     
-    
     console.log('index.js thinks this is a reconnect of', connection, ' and intent: ', ocbpmnConnectionIntent.getIntent(), intent);
     const source = context.source;
     const target = context.target;

@@ -10,6 +10,16 @@ export function createObjectTypeMenu() {
   const palette = document.querySelector('.djs-palette');
   if (!palette) return;
   
+  // Style for selected button
+  const style = document.createElement('style');
+  style.textContent = `
+  #ocbpmn-object-type-menu button.ocbpmn-selected-type {
+      border: 3px solid black;
+      font-weight: bold;
+    }
+  `;
+  document.head.appendChild(style);
+  
   // Create menu container
   const menu = document.createElement('div');
   menu.id = 'ocbpmn-object-type-menu';
@@ -25,6 +35,17 @@ export function createObjectTypeMenu() {
   const startObjects = elementRegistry.filter(e => e.type === 'ocbpmn:startobject' &&
     e.businessObject.originalLabel && e.businessObject.name);
   
+  // Add listener
+  SelectedObjectTypeService.addListener((event, objectData) => {
+    const buttons = document.querySelectorAll('#ocbpmn-object-type-menu button');
+    buttons.forEach(button => {
+      button.classList.remove('ocbpmn-selected-type');
+      if (event === 'selected' && button.innerText === objectData?.name) {
+        button.classList.add('ocbpmn-selected-type');
+      }
+    });
+  });
+  
   if (startObjects.length === 0) {
     menu.innerHTML = '<em>No object types yet</em>';
   } else {
@@ -32,9 +53,11 @@ export function createObjectTypeMenu() {
     startObjects.forEach(obj => {
       const btn = document.createElement('button');
       btn.innerText = obj.businessObject.name;
+      btn.title = 'Select Object Type: ' + obj.businessObject.name;
       btn.style.background = obj.businessObject.customColors?.fill || '#fff';
       btn.style.color = obj.businessObject.customColors?.stroke || '#000';
       btn.style.margin = '2px';
+      //btn.style.border = '3px solid black';
       btn.onclick = function(e) {
         // Save the selected object type in the service
         SelectedObjectTypeService.setSelected({
