@@ -235,7 +235,8 @@ export default function ChangeColor(modeler) {
 
       // Sicherstellen, dass outgoing ein Array ist und Verbindungen enthält
       const outgoingCon = Array.isArray(element.outgoing) ? element.outgoing : [];
-      const sourceColors = element.businessObject.customColors;
+      const sourceColors = element.businessObject.customColors || { fill: '#6691ff',
+        stroke: '#0048ff' };
       const sourceName = element.businessObject.name || '';
       const sourceOgLabel = element.businessObject.originalLabel;
 
@@ -284,9 +285,13 @@ export default function ChangeColor(modeler) {
             }
             eventBus.fire('element.changed', { element: connection.target });
           }
-
           eventBus.fire('element.changed', { element: connection });
           eventBus.fire('element.updateLabel', { element: connection });
+          
+          if (connection.businessObject.visualLabel !== undefined) {
+            console.log("CHANGECOLOR: visualLabel updateLabel for connection", connection.id, "is set to", connection.businessObject.visualLabel);
+            eventBus.fire('connection.updateLabel', { connection: connection });
+          }
 
         });
 

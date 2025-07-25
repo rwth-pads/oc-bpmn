@@ -54,8 +54,8 @@ export function createObjectTypeMenu() {
       const btn = document.createElement('button');
       btn.innerText = obj.businessObject.name;
       btn.title = 'Select Object Type: ' + obj.businessObject.name;
-      btn.style.background = obj.businessObject.customColors?.fill || '#fff';
-      btn.style.color = obj.businessObject.customColors?.stroke || '#000';
+      btn.style.background = obj.businessObject.customColors?.fill || '#6691ff';
+      btn.style.color = obj.businessObject.customColors?.stroke || '#0048ff';
       btn.style.margin = '2px';
       //btn.style.border = '3px solid black';
       btn.onclick = function(e) {

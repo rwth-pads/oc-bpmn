@@ -63,6 +63,16 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
     }
   });
   
+  eventBus.on('connection.updateLabel', function(e) {
+    console.log('OCBPMN UPDATER: updateLabel', e);
+    const connection = e.connection;
+    if (e.defaultPrevented) return;
+    //const connection = e.context.connection;
+    if (isocbpmn(connection)) {
+      updateStackedConnections(connection, e);
+    }
+  });
+  
   eventBus.on('shape.create', function(e) {
     const shape = e.element;
     const shapeType = shape.type || shape.businessObject.type;
