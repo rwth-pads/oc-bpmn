@@ -237,7 +237,7 @@ export default function ChangeColor(modeler) {
       const outgoingCon = Array.isArray(element.outgoing) ? element.outgoing : [];
       const sourceColors = element.businessObject.customColors || { fill: '#6691ff',
         stroke: '#0048ff' };
-      const sourceName = element.businessObject.name || '';
+      const sourceName = element.businessObject.name;
       const sourceOgLabel = element.businessObject.originalLabel;
 
       // Find all related connection from object flow path (have the same name or the target is an endobject with the same name)
@@ -246,10 +246,10 @@ export default function ChangeColor(modeler) {
         ((e.businessObject && e.businessObject.name === element.businessObject.name) ||
           (e.target && e.target.type === 'ocbpmn:endobject' && e.target.businessObject && e.target.businessObject.name === sourceName) ||
           (e.businessObject && e.businessObject.originalLabel && e.businessObject.originalLabel === sourceOgLabel) ||
-          (e.businessObject && e.businessObject.name && e.businessObject.name.includes(sourceName) && e.businessObject.name.includes('['))
+          (e.businessObject && e.businessObject.name && sourceName !== '' && e.businessObject.name.includes(sourceName) && e.businessObject.name.includes('['))
         )
       );
-      console.log('CHANGECOLOR: eventBus element.changed for ocbpmn:startobject:', element, 'and relatedConnections:', relatedConnections, 'event:', event);
+      console.log('CHANGECOLOR: eventBus element.changed for ocbpmn:startobject:', element, 'and relatedConnections:', relatedConnections, 'sourcename:', sourceName, 'sourceColors:', sourceColors, 'sourceOgLabel:', sourceOgLabel);
 
       // Update customColors of related object flow connections on color change of startobject
       if (sourceColors) {

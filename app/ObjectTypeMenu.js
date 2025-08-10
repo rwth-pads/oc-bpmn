@@ -12,12 +12,26 @@ export function createObjectTypeMenu() {
   
   // Style for selected button
   const style = document.createElement('style');
+  //style.textContent = `
+  //#ocbpmn-object-type-menu button.ocbpmn-selected-type {
+    //  border: 3px solid black;
+  //  font-weight: bold;
+   // }
+  // `;
   style.textContent = `
-  #ocbpmn-object-type-menu button.ocbpmn-selected-type {
-      border: 3px solid black;
-      font-weight: bold;
-    }
-  `;
+  #ocbpmn-object-type-menu {
+    width: 220px; /* Feste Breite */
+  }
+  #ocbpmn-object-type-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 Spalten */
+    gap: 4px; /* Abstand zwischen Buttons */
+  }
+  #ocbpmn-object-type-menu button {
+    width: 100%; /* Button füllt Zelle aus */
+    min-width: 0; /* Verhindert Überbreite */
+  }
+`;
   document.head.appendChild(style);
   
   // Create menu container
@@ -50,6 +64,10 @@ export function createObjectTypeMenu() {
     menu.innerHTML = '<em>No object types yet</em>';
   } else {
     menu.innerHTML = '<strong>Object Types:</strong><br/>';
+    // Create a container for buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.id = 'ocbpmn-object-type-buttons';
+    menu.appendChild(buttonContainer);
     startObjects.forEach(obj => {
       const btn = document.createElement('button');
       btn.innerText = obj.businessObject.name;
@@ -67,7 +85,8 @@ export function createObjectTypeMenu() {
           visualLabel: obj.businessObject.visualLabel
         });
       };
-      menu.appendChild(btn);
+      //menu.appendChild(btn);
+      buttonContainer.appendChild(btn);
     });
   }
   
