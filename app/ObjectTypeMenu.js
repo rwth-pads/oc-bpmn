@@ -12,13 +12,11 @@ export function createObjectTypeMenu() {
   
   // Style for selected button
   const style = document.createElement('style');
-  //style.textContent = `
-  //#ocbpmn-object-type-menu button.ocbpmn-selected-type {
-    //  border: 3px solid black;
-  //  font-weight: bold;
-   // }
-  // `;
   style.textContent = `
+  #ocbpmn-object-type-menu button.ocbpmn-selected-type {
+      border: 3px solid black;
+   font-weight: bold;
+    }
   #ocbpmn-object-type-menu {
     width: 220px; /* Feste Breite */
   }
