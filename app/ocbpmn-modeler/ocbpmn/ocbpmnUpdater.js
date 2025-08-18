@@ -479,9 +479,11 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
         
         // Handle labels
         if (index === 0) {
+          const joinSymbol = target.type === 'ocbpmn:startobject' ? 'x' : ',';
+          console.log('OCBPMN UPDATER handling combined label with joinSymbol:', joinSymbol, "and target type:", target.type);
 
           // First connection gets combined label as visualLabel only
-          const finalCombinedLabel = validNames.join('x');
+          const finalCombinedLabel = validNames.join(joinSymbol);
 
           // console.log("First connection combined label:", finalCombinedLabel);
 
@@ -762,8 +764,8 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
       eventBus.fire('element.changed', { element: connection });
     }
     
-    console.log("OCBPMN UPDATER: updateocbpmnConnection connection:", connection, "source:", source);
-    if (connection.source && connection.source.type === 'ocbpmn:startobject' && !connection.source.originalLabel) {
+    console.log("OCBPMN UPDATER: updateocbpmnConnection connection:", connection, "source:", source, connection.source);
+    if (source && source.type === 'ocbpmn:startobject' && !source.businessObject.originalLabel) {
       alert("No object type initialized. Please name the start object type node first.");
     }
 
