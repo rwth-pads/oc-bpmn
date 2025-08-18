@@ -111,7 +111,8 @@ ocbpmnRules.prototype.init = function() {
 
       if (connectionType === 'ocbpmn:connection') {
         // Only check if the new source/target combination is valid
-        if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
+        if ((source !== target) &&
+          (source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
                 source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:ParallelGateway'
                 || source.type === 'bpmn:IntermediateThrowEvent') &&
             (target.type === 'ocbpmn:startobject' || target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||
@@ -130,7 +131,8 @@ ocbpmnRules.prototype.init = function() {
       console.log('OCBPMN RULES: canConnect create', { intent, source: source.type, target: target.type });
 
       if (intent === 'ocbpmn:connection') {
-        if ((source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
+        if ((source !== target) &&
+          (source.type === 'ocbpmn:startobject' || source.type === 'ocbpmn:intermediateobject' ||
                 source.type === 'bpmn:Task' || source.type === 'bpmn:ExclusiveGateway' || source.type === 'bpmn:ParallelGateway'
                 || source.type === 'bpmn:IntermediateThrowEvent') &&
             (target.type === 'ocbpmn:startobject' || target.type === 'ocbpmn:intermediateobject' || target.type === 'ocbpmn:endobject' ||

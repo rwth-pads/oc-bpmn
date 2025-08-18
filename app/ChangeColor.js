@@ -243,7 +243,7 @@ export default function ChangeColor(modeler) {
       // Find all related connection from object flow path (have the same name or the target is an endobject with the same name)
       const relatedConnections = elementRegistry.filter(e =>
         e.type === 'ocbpmn:connection' &&
-        ((e.businessObject && e.businessObject.name === element.businessObject.name) ||
+        ((e.businessObject && sourceName && e.businessObject.name === sourceName) ||
           (e.target && e.target.type === 'ocbpmn:endobject' && e.target.businessObject && e.target.businessObject.name === sourceName) ||
           (e.businessObject && e.businessObject.originalLabel && e.businessObject.originalLabel === sourceOgLabel) ||
           (e.businessObject && e.businessObject.name && sourceName !== '' && e.businessObject.name.includes(sourceName) && e.businessObject.name.includes('['))

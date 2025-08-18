@@ -4,6 +4,7 @@ import pizzaDiagram from '../resources/pizza-collaboration.bpmn';
 import orderDiagram from '../resources/simpleorderprocess.bpmn';
 import makePizzaDiagram from '../resources/pizzaBakingDiag.bpmn';
 import pumpkinpie from '../resources/pumpkinpie.bpmn';
+import buttermilk from '../resources/narasbuttermilk.bpmn';
 import ocbpmnElements from './ocbpmn-elements.json';
 import ocbpmnModeler from './ocbpmn-modeler';
 import ExtendedColorPickerModule from './ExtendedColorPickerModule';
@@ -144,7 +145,7 @@ var modeler = new ocbpmnModeler({
  */
 
 // Import BPMN diagram here
-modeler.importXML(pumpkinpie).then(() => {
+modeler.importXML(buttermilk).then(() => {
   modeler.get('canvas').zoom('fit-viewport');
 
   // Only call addocbpmnElements after importXML resolves!

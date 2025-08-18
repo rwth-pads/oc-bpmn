@@ -12,23 +12,23 @@ class ExtendedColorPopupProvider extends ColorPopupProvider {
     const newColors = [
       {
         label: 'Default',
-        fill: '#ffffff',
-        stroke: '#22242A'
+        fill: '#6691ff',
+        stroke: '#0048ff'
       },
       {
-        label: 'EmergeRed',
+        label: 'BrightRed',
         fill: '#FFC2C2',
         stroke: '#FF0000'
       },
       {
-        label: 'EmergeGreen',
+        label: 'BrightGreen',
         fill: '#C2FFC2',
         stroke: '#44ff00'
       },
       {
-        label: 'EmergeBlue',
-        fill: '#6691ff',
-        stroke: '#0048ff'
+        label: 'EmergeOrange',
+        fill: '#ffb375',
+        stroke: '#ff8100'
       },
       {
         label: 'EmergeYellow',
@@ -36,24 +36,34 @@ class ExtendedColorPopupProvider extends ColorPopupProvider {
         stroke: '#FFD700' // Gold stroke
       },
       {
-        label: 'DissolveRed',
-        fill: '#FFFFFF', // White fill
-        stroke: '#FF0000' // Red stroke
+        label: 'EmergePurple',
+        fill: '#ab66ff', // White fill
+        stroke: '#762cd1' // Red stroke
       },
       {
         label: 'DissolveGreen',
-        fill: '#FFFFFF', // White fill
-        stroke: '#44ff00' // Green stroke
+        fill: '#8bda76', // White fill
+        stroke: '#1b9500' // Green stroke
       },
       {
         label: 'DissolveBlue',
-        fill: '#FFFFFF', // White fill
-        stroke: '#0048ff' // Blue stroke
+        fill: '#a4e9ff', // White fill
+        stroke: '#00abdd' // Blue stroke
       },
       {
-        label: 'DissolveYellow',
-        fill: '#FFFFFF', // Yellow fill
-        stroke: '#FFD700' // Gold stroke
+        label: 'EmergeBrown',
+        fill: '#ed9e5e', // Yellow fill
+        stroke: '#9e551b' // Gold stroke
+      },
+      {
+        label: 'BrightPink',
+        fill: '#ff87ed',
+        stroke: '#ff00dd'
+      },
+      {
+        label: 'EmergeLime',
+        fill: '#ecff97',
+        stroke: '#c0ff00'
       }
     ];
 

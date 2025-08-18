@@ -120,20 +120,21 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
     ),
     'create.task': createAction(
       'bpmn:Task', 'activity', 'bpmn-icon-task'
-    ),
-    'create.subprocess-expanded': createAction(
-      'bpmn:SubProcess', 'activity', 'bpmn-icon-subprocess-expanded', 'Create expanded SubProcess',
-      { isExpanded: true }
-    ),
-    'create.participant-expanded': {
-      group: 'collaboration',
-      className: 'bpmn-icon-participant',
-      title: 'Create Pool/Participant',
-      action: {
-        dragstart: createParticipant,
-        click: createParticipant
-      }
-    }
+    )
+    //,
+    //'create.subprocess-expanded': createAction(
+      //'bpmn:SubProcess', 'activity', 'bpmn-icon-subprocess-expanded', 'Create expanded SubProcess',
+      //{ isExpanded: true }
+    //),
+    //'create.participant-expanded': {
+    //  group: 'collaboration',
+      //className: 'bpmn-icon-participant',
+      //title: 'Create Pool/Participant',
+      //action: {
+        //dragstart: createParticipant,
+        //click: createParticipant
+     // }
+    //}
   });
 
   return actions;

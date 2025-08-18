@@ -761,6 +761,11 @@ export default function ocbpmnUpdater(eventBus, modeling, bpmnjs, elementRegistr
       // Fire event to trigger immediate color update
       eventBus.fire('element.changed', { element: connection });
     }
+    
+    console.log("OCBPMN UPDATER: updateocbpmnConnection connection:", connection, "source:", source);
+    if (connection.source && connection.source.type === 'ocbpmn:startobject' && !connection.source.originalLabel) {
+      alert("No object type initialized. Please name the start object type node first.");
+    }
 
     // Add new connection to current object flow path
     updateRelatedConnections(connection, e);
